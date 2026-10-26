@@ -1,5 +1,5 @@
 
-name: Android APK Build
+name: Build Hamrah Trader APK
 
 on:
   workflow_dispatch:
@@ -8,8 +8,43 @@ on:
       - ".github/workflows/main.yml"
 
 jobs:
-  check:
+  build:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Check workflow
-        run: echo "GitHub Actions is working"
+      - name: Get project files
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install Cordova
+        run: npm install -g cordova
+
+      - name: Create Android project
+        run: |
+          cordova create app com.hamrahtrader.app "Hamrah Trader"
+          cp index.html app/www/index.html
+          cp manifest.json app/www/manifest.json
+          cp sw.js app/www/sw.js
+          cd app
+          cordova platform add android
+
+      - name: Build APK
+        run: |
+          cd app
+          cordova build android --debug
+
+      - name: Save APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Hamrah-Trader-APK
+          path: app/platforms/android/app/build/outputs/apk/debug/app-debug.apk
