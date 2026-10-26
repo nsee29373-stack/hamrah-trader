@@ -1,1 +1,15 @@
 
+name: Android APK Build
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - ".github/workflows/main.yml"
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check workflow
+        run: echo "GitHub Actions is working"
