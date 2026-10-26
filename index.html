@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#101827">
+<link rel="manifest" href="manifest.json">
+<title>همراه تریدر - نسخه آزمایشی</title>
+<style>
+:root{color-scheme:dark;--bg:#101827;--panel:#182337;--line:#2c3a50;--text:#f2f5fb;--muted:#a9b6ca;--accent:#7dd3fc}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:16px system-ui,sans-serif;padding:16px;max-width:700px;margin:auto}
+header{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:16px}.tag{border:1px solid var(--line);border-radius:20px;padding:5px 10px;font-size:12px;color:var(--accent)}
+h1{font-size:22px;margin:0}h2{font-size:17px;margin:0 0 12px}.muted{color:var(--muted);font-size:13px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:15px;margin-bottom:12px}.value{font-size:22px;font-weight:750;margin-top:6px}
+select,input,button{width:100%;padding:12px;border-radius:10px;border:1px solid var(--line);background:#111c2e;color:var(--text);font:inherit;margin-top:8px}
+button{background:#164e63;border-color:#0e7490;font-weight:700;cursor:pointer}.secondary{background:#263247;border-color:var(--line)}.warn{background:#7f1d1d;border-color:#991b1b}
+label{display:block;margin-top:10px;font-size:13px;color:var(--muted)}.notice{font-size:12px;line-height:1.8;color:var(--muted)}
+footer{text-align:center;margin:16px 0}
+</style>
+</head>
+<body>
+<header><div><h1>همراه تریدر</h1><div class="muted">نسخه آزمایشی مخصوص موبایل</div></div><span class="tag">DEMO</span></header>
+<div class="grid">
+ <section class="card"><div class="muted">موجودی فرضی</div><div class="value">10,000 $</div><div class="muted">حساب آزمایشی</div></section>
+ <section class="card"><div class="muted">وضعیت ربات</div><div class="value" id="botStatus">خاموش</div><div class="muted">سفارشی ارسال نمی‌شود</div></section>
+</div>
+<section class="card">
+<h2>بازار و تحلیل</h2>
+<label for="symbol">انتخاب نماد</label>
+<select id="symbol"><option value="EUR/USD">EUR/USD — یورو/دلار</option><option value="XAU/USD">XAU/USD — طلا</option><option value="GBP/USD">GBP/USD — پوند/دلار</option><option value="USD/JPY">USD/JPY — دلار/ین</option></select>
+<div class="grid"><div><div class="muted">قیمت نمونه</div><div class="value" id="price">1.1640</div></div><div><div class="muted">سیگنال</div><div class="value" id="signal">خنثی</div></div></div>
+<button id="analyze">تحلیل نمونه</button>
+<p class="notice" id="analysis">قیمت‌ها ساختگی و صرفاً برای آزمایش رابط کاربری هستند. برای تحلیل واقعی باید داده زنده متصل شود.</p>
+</section>
+<section class="card">
+<h2>مدیریت ریسک</h2>
+<label for="capital">سرمایه معامله (دلار)</label><input id="capital" type="number" min="1" value="1000">
+<label for="risk">ریسک هر معامله (۰٫۱ تا ۲ درصد)</label><input id="risk" type="number" min="0.1" max="2" step="0.1" value="1">
+<div>سقف ریسک محاسباتی: <strong id="riskValue">10 دلار</strong></div>
+<p class="notice">این فقط محاسبه آموزشی است. حجم واقعی معامله باید با فاصله حد ضرر و مشخصات نماد تعیین شود.</p>
+</section>
+<section class="card">
+<h2>ربات آزمایشی</h2>
+<p class="notice">این کلید فقط وضعیت نمایشی را تغییر می‌دهد؛ ربات به بروکر وصل نیست و هیچ معامله‌ای انجام نمی‌دهد.</p>
+<button id="toggle">شروع حالت آزمایشی</button><button class="warn" id="stop">توقف اضطراری</button>
+<p class="notice" id="botNote" aria-live="polite">ربات متوقف است.</p>
+</section>
+<footer class="notice">نسخه اولیه · بدون اتصال به بازار · بدون تضمین سود</footer>
+<script>
+const $=id=>document.getElementById(id);
+const prices={'EUR/USD':'1.1640','XAU/USD':'4,110.00','GBP/USD':'1.3320','USD/JPY':'152.40'};
+$('symbol').addEventListener('change',()=>{$('price').textContent=prices[$('symbol').value];$('signal').textContent='خنثی';$('analysis').textContent='قیمت انتخاب‌شده نمایشی است؛ داده زنده متصل نیست.'});
+$('analyze').addEventListener('click',()=>{$('signal').textContent='خنثی';$('analysis').textContent='برای جلوگیری از نمایش سیگنال گمراه‌کننده، تا زمان اتصال داده زنده تحلیل واقعی تولید نمی‌شود.'});
+function calc(){let c=Number($('capital').value),r=Number($('risk').value);$('riskValue').textContent=(c>0&&r>=.1&&r<=2?(c*r/100).toLocaleString('en-US',{maximumFractionDigits:2})+' دلار':'مقدار نامعتبر')}
+$('capital').addEventListener('input',calc);$('risk').addEventListener('input',calc);calc();
+let on=false;function stop(){on=false;$('botStatus').textContent='خاموش';$('toggle').textContent='شروع حالت آزمایشی';$('botNote').textContent='ربات متوقف است؛ سفارش واقعی ارسال نشده است.'}
+$('toggle').addEventListener('click',()=>{on=!on;$('botStatus').textContent=on?'دمو روشن':'خاموش';$('toggle').textContent=on?'خاموش‌کردن ربات':'شروع حالت آزمایشی';$('botNote').textContent=on?'حالت نمایشی فعال است؛ معامله واقعی انجام نمی‌شود.':'حالت آزمایشی خاموش شد.'});
+$('stop').addEventListener('click',stop);
+if('serviceWorker' in navigator) window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+</script>
+</body></html>
