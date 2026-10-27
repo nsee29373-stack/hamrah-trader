@@ -117,6 +117,8 @@ const symbols = {
 let botOn = false;
 let requestNumber = 0;
 
+const priceHistory = {};
+
 async function updatePrice() {
   const symbol = $("symbol").value;
   const apiSymbol = symbols[symbol];
@@ -139,6 +141,17 @@ async function updatePrice() {
 
     if (thisRequest !== requestNumber) return;
 
+const symbolKey = $("symbol").value;
+if (!priceHistory[symbolKey]) {
+  priceHistory[symbolKey] = [];
+}
+priceHistory[symbolKey].push({
+  time: Date.now(),
+  price: (data.bid + data.ask) / 2
+});
+if (priceHistory[symbolKey].length > 100) {
+  priceHistory[symbolKey].shift();
+}
     if (data.stale === true ||
         typeof data.bid !== "number" ||
         typeof data.ask !== "number" ||
@@ -237,6 +250,7 @@ $("stop").addEventListener("click", function () {
 });
 
 updatePrice();
+  
 calculateRisk();
 setInterval(updatePrice, 30000);
 </script>
