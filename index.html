@@ -47,6 +47,161 @@ footer{text-align:center;margin:16px 0}
 </section>
 <footer class="notice">نسخه اولیه · بدون اتصال به بازار · بدون تضمین سود</footer>
 <script>
+const $ = id => document.getElementById(id);
+
+const symbols = {
+  "EUR/USD": "EURUSD",
+  "XAU/USD": "XAUUSD",
+  "GBP/USD": "GBPUSD",
+  "USD/JPY": "USDJPY"
+};
+
+const prices = {};
+let loading = false;
+
+function formatPrice(value, symbol) {
+  const n = Number(value);
+  if (!Number.isFinite(n)) return "نامشخص";
+  return n.toLocaleString("en-US", {
+    minimumFractionDigits: symbol === "XAU/USD" ? 2 : 3,
+    maximumFractionDigits: symbol === "XAU/USD" ? 2 : 5
+  });
+}
+
+async function loadPrices() {
+  if (loading) return;
+  loading = true;
+
+  try {
+    $("analysis").textContent = "در حال دریافت قیمت‌ها از منبع بازار...";
+
+    const url =
+      "https://api.marketapi.app/v1/free/prices/latest?symbols=" +
+      "EURUSD%2CXAUUSD%2CGBPUSD%2CUSDJPY";
+
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error("HTTP " + response.status);
+    }
+
+    const result = await response.json();
+    const rows = Array.isArray(result)
+      ? result
+      : result.data;
+
+    if (!Array.isArray(rows)) {
+      throw new Error("ساختار پاسخ نامعتبر است");
+    }
+
+    for (const row of rows) {
+      const symbol = Object.keys(symbols).find(
+        key => symbols[key] === row.symbol
+      );
+
+      if (!symbol) continue;
+
+      const bid = Number(row.bid);
+      const ask = Number(row.ask);
+
+      if (
+        Number.isFinite(bid) &&
+        Number.isFinite(ask) &&
+        bid > 0 &&
+        ask > 0
+      ) {
+        prices[symbol] = {
+          value: (bid + ask) / 2,
+          status: row.status || "نامشخص",
+          updated: row.timestamp || row.updated_at || ""
+        };
+      }
+    }
+
+    showPrice();
+
+    $("analysis").textContent =
+      "قیمت از سرویس بازار دریافت شد. وضعیت بازار و زمان آخرین به‌روزرسانی را بررسی کن.";
+
+  } catch (error) {
+    $("analysis").textContent =
+      "دریافت قیمت ناموفق بود. اتصال اینترنت یا دسترسی سرویس را بررسی کن. قیمت نمایشی جایگزین نمی‌شود.";
+  } finally {
+    loading = false;
+  }
+}
+
+function showPrice() {
+  const symbol = $("symbol").value;
+  const item = prices[symbol];
+
+  if (!item) {
+    $("price").textContent = "—";
+    $("signal").textContent = "نامشخص";
+    return;
+  }
+
+  $("price").textContent = formatPrice(item.value, symbol);
+  $("signal").textContent = "منتظر تحلیل";
+
+  $("analysis").textContent =
+    "نماد: " + symbols[symbol] +
+    " | وضعیت بازار: " + item.status +
+    (item.updated ? " | زمان داده: " + item.updated : "");
+}
+
+$("symbol").addEventListener("change", showPrice);
+
+$("analyze").addEventListener("click", () => {
+  $("signal").textContent = "خنثی";
+  $("analysis").textContent =
+    "قیمت دریافت‌شده هنوز به‌تنهایی سیگنال خرید یا فروش نیست.";
+});
+
+function calc() {
+  const capital = Number($("capital").value);
+  const risk = Number($("risk").value);
+
+  $("riskValue").textContent =
+    capital > 0 && risk >= 0.1 && risk <= 2
+      ? (capital * risk / 100).toLocaleString("en-US") + " دلار"
+      : "مقدار نامعتبر";
+}
+
+$("capital").addEventListener("input", calc);
+$("risk").addEventListener("input", calc);
+calc();
+
+let on = false;
+
+function stop() {
+  on = false;
+  $("botStatus").textContent = "خاموش";
+  $("toggle").textContent = "شروع حالت آزمایشی";
+  $("botNote").textContent =
+    "ربات متوقف است؛ سفارش واقعی ارسال نشده است.";
+}
+
+$("toggle").addEventListener("click", () => {
+  on = !on;
+  $("botStatus").textContent = on ? "دمو روشن" : "خاموش";
+  $("toggle").textContent =
+    on ? "خاموش‌کردن ربات" : "شروع حالت آزمایشی";
+  $("botNote").textContent =
+    on ? "حالت نمایشی فعال است؛ معامله واقعی انجام نمی‌شود."
+       : "حالت آزمایشی خاموش شد.";
+});
+
+$("stop").addEventListener("click", stop);
+
+loadPrices();
+setInterval(loadPrices, 60000);
+
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./sw.js").catch(() => {});
+  });
+}
+
 const $=id=>document.getElementById(id);
 const prices={'EUR/USD':'1.1640','XAU/USD':'4,110.00','GBP/USD':'1.3320','USD/JPY':'152.40'};
 $('symbol').addEventListener('change',()=>{$('price').textContent=prices[$('symbol').value];$('signal').textContent='خنثی';$('analysis').textContent='قیمت انتخاب‌شده نمایشی است؛ داده زنده متصل نیست.'});
