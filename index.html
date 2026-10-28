@@ -120,6 +120,104 @@ let requestNumber = 0;
 const priceHistory = {};
 
 async function updatePrice() {
+  
+async function updatePrice() {
+  const symbol = $("symbol").value;
+  const apiSymbol = symbols[symbol];
+  const thisRequest = ++requestNumber;
+
+  $("analysis").textContent = "در حال دریافت قیمت بازار...";
+  $("signal").textContent = "در انتظار داده";
+
+  try {
+    if (!apiSymbol) {
+      throw new Error("نماد بازار معتبر نیست");
+    }
+
+    const response = await fetch(
+      "https://biquote.io/api/" +
+      encodeURIComponent(apiSymbol) +
+      "?allowStale=false",
+      { cache: "no-store" }
+    );
+
+    if (!response.ok) {
+      throw new Error("HTTP " + response.status);
+    }
+
+    const data = await response.json();
+
+    if (thisRequest !== requestNumber) return;
+
+    if (
+      data.stale === true ||
+      typeof data.bid !== "number" ||
+      typeof data.ask !== "number" ||
+      !Number.isFinite(data.bid) ||
+      !Number.isFinite(data.ask) ||
+      data.bid <= 0 ||
+      data.ask <= 0 ||
+      data.ask < data.bid
+    ) {
+      throw new Error("قیمت معتبر یا تازه در دسترس نیست");
+    }
+
+    const mid =
+      typeof data.mid === "number" &&
+      Number.isFinite(data.mid) &&
+      data.mid > 0
+        ? data.mid
+        : (data.bid + data.ask) / 2;
+
+    if (!priceHistory[symbol]) {
+      priceHistory[symbol] = [];
+    }
+
+    priceHistory[symbol].push({
+      time: Date.now(),
+      price: mid
+    });
+
+    if (priceHistory[symbol].length > 100) {
+      priceHistory[symbol].shift();
+    }
+
+    $("price").textContent = mid.toLocaleString("en-US", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 5
+    });
+
+    $("signal").textContent = "خنثی";
+
+    const time = data.timestamp
+      ? new Date(data.timestamp).toLocaleTimeString("fa-IR")
+      : "نامشخص";
+
+    const market = data.marketState === "open"
+      ? "بازار باز"
+      : "بازار بسته یا خارج از ساعت معامله";
+
+    $("analysis").textContent =
+      "قیمت دریافتی از سرویس بازار برای " + symbol +
+      " | خرید: " + data.bid +
+      " | فروش: " + data.ask +
+      " | وضعیت: " + market +
+      " | زمان آخرین قیمت: " + time +
+      " | منبع: " + (data.source || "نامشخص") +
+      ". سیگنال خریدوفروش تولید نمی‌شود.";
+
+  } catch (error) {
+    if (thisRequest !== requestNumber) return;
+
+    $("price").textContent = "در دسترس نیست";
+    $("signal").textContent = "بدون داده";
+
+    $("analysis").textContent =
+      "دریافت قیمت ناموفق بود. اتصال اینترنت، وضعیت سرویس یا نماد را بررسی کن. " +
+      "خطا: " + error.message;
+  }
+}
+
   const symbol = $("symbol").value;
   const apiSymbol = symbols[symbol];
   const thisRequest = ++requestNumber;
