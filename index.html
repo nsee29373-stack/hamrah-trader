@@ -355,48 +355,28 @@ async function updatePrice() {
       ask:data.ask,
       receivedAt:Date.now(),
       stale,
-      closed,
-      quoteAgeSeconds:Number.isFinite(data.quoteAgeSeconds)
-        ? data.quoteAgeSeconds
-        : null
-    };
+      
+quoteAgeSeconds: (() => {
+  if (Number.isFinite(data.quoteAgeSeconds)) {
+    return data.quoteAgeSeconds;
+  }
 
-    $("signal").textContent = stale
-      ? "قیمت قدیمی"
-      : closed
-        ? "بازار تعطیل"
-        : "داده دریافت شد";
+  if (data.timestamp) {
+    let timestamp = data.timestamp;
 
-    let time = "نامشخص";
-
-    if (data.timestamp) {
-      const date = new Date(data.timestamp);
-      if (!Number.isNaN(date.getTime())) {
-        time = date.toLocaleString("fa-IR");
-      }
+    if (typeof timestamp === "number" && timestamp < 1e12) {
+      timestamp *= 1000;
     }
 
-    const age = latestQuote.quoteAgeSeconds !== null
-      ? " | سن قیمت: " + latestQuote.quoteAgeSeconds + " ثانیه"
-      : "";
+    const parsed = new Date(timestamp).getTime();
 
-    $("analysis").textContent =
-      "نماد: " + symbol +
-      " | ASK: " + data.ask +
-      " | BID: " + data.bid +
-      " | زمان: " + time +
-      age +
-      " | منبع: " + (data.source || "نامشخص") +
-      " | وضعیت بازار: " + (data.marketState || "نامشخص");
-
-    if (stale || closed) {
-      $("tradeNote").textContent =
-        "قیمت قدیمی است یا بازار تعطیل است؛ برای تصمیم معاملاتی از آن استفاده نکن.";
-    } else {
-      $("tradeNote").textContent =
-        "قیمت دریافت شد. دکمه‌ها فقط انتخاب نمایشی انجام می‌دهند و سفارش ارسال نمی‌کنند.";
+    if (Number.isFinite(parsed)) {
+      return Math.max(0, (Date.now() - parsed) / 1000);
     }
+  }
 
+  return null;
+})()
   } catch (error) {
     if (thisRequest !== requestNumber) return;
 
