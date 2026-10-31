@@ -15,7 +15,6 @@
   --line:#2c3a50;
   --text:#f2f5fb;
   --muted:#a9b6ca;
-  --accent:#7dd3fc;
 }
 *{box-sizing:border-box}
 body{
@@ -39,7 +38,7 @@ header{
   border-radius:20px;
   padding:5px 10px;
   font-size:12px;
-  color:var(--accent);
+  color:#7dd3fc;
 }
 h1{font-size:22px;margin:0}
 h2{font-size:17px;margin:0 0 12px}
@@ -79,19 +78,25 @@ button{
   font-weight:700;
   cursor:pointer;
 }
-.secondary{background:#263247;border-color:var(--line)}
-.warn{background:#7f1d1d;border-color:#991b1b}
-label{
-  display:block;
-  margin-top:10px;
-  font-size:13px;
-  color:var(--muted);
+button:disabled{
+  opacity:.55;
+  cursor:not-allowed;
+}
+.warn{
+  background:#7f1d1d;
+  border-color:#991b1b;
 }
 .notice{
   font-size:12px;
   line-height:1.9;
   color:var(--muted);
   overflow-wrap:anywhere;
+}
+label{
+  display:block;
+  margin-top:10px;
+  font-size:13px;
+  color:var(--muted);
 }
 .trade-actions{
   display:grid;
@@ -120,10 +125,9 @@ label{
   background:#111c2e;
   line-height:1.9;
 }
-footer{text-align:center;margin:16px 0}
-button:disabled{
-  opacity:.5;
-  cursor:not-allowed;
+footer{
+  text-align:center;
+  margin:16px 0;
 }
 @media(max-width:360px){
   .value{font-size:18px}
@@ -178,14 +182,14 @@ button:disabled{
     </div>
   </div>
 
-  <button id="analyze">دریافت قیمت اکنون</button>
+  <button id="analyze" type="button">دریافت قیمت اکنون</button>
 
   <p class="notice" id="analysis" aria-live="polite">
     هنوز قیمت دریافت نشده است.
   </p>
 
   <p class="notice">
-    قیمت‌ها به سرویس خارجی وابسته‌اند.
+    قیمت‌ها از سرویس خارجی دریافت می‌شوند و ممکن است با قیمت بروکر متفاوت باشند.
   </p>
 </section>
 
@@ -204,23 +208,16 @@ button:disabled{
   </div>
 
   <div class="trade-actions">
-    <button type="button"
-      class="trade-button buy"
-      id="buyButton">
+    <button type="button" class="trade-button buy" id="buyButton">
       ↑ خرید BUY
     </button>
-
-    <button type="button"
-      class="trade-button sell"
-      id="sellButton">
+    <button type="button" class="trade-button sell" id="sellButton">
       ↓ فروش SELL
     </button>
   </div>
 
-  <div class="trade-note notice"
-       id="tradeNote" aria-live="polite">
-    اتصال MT5 هنوز برقرار نیست.
-    این دکمه‌ها فعلاً فقط جهت معامله را انتخاب می‌کنند.
+  <div class="trade-note notice" id="tradeNote" aria-live="polite">
+    اتصال MT5 برقرار نشده است. این دکمه‌ها فعلاً سفارش واقعی ارسال نمی‌کنند.
   </div>
 </section>
 
@@ -228,12 +225,10 @@ button:disabled{
   <h2>مدیریت ریسک</h2>
 
   <label for="capital">سرمایه معامله (دلار)</label>
-  <input id="capital" type="number"
-    min="1" value="1000">
+  <input id="capital" type="number" min="1" step="1" value="1000">
 
   <label for="risk">ریسک هر معامله (۰٫۱ تا ۲ درصد)</label>
-  <input id="risk" type="number"
-    min="0.1" max="2" step="0.1" value="1">
+  <input id="risk" type="number" min="0.1" max="2" step="0.1" value="1">
 
   <div>
     سقف ریسک محاسباتی:
@@ -249,11 +244,11 @@ button:disabled{
   <h2>ربات آزمایشی</h2>
 
   <p class="notice">
-    حالت نمایشی است؛ به بروکر وصل نمی‌شود و معامله‌ای انجام نمی‌دهد.
+    این حالت نمایشی است؛ به بروکر وصل نمی‌شود و معامله‌ای انجام نمی‌دهد.
   </p>
 
-  <button id="toggle">شروع حالت آزمایشی</button>
-  <button class="warn" id="stop">توقف اضطراری</button>
+  <button id="toggle" type="button">شروع حالت آزمایشی</button>
+  <button class="warn" id="stop" type="button">توقف اضطراری</button>
 
   <p class="notice" id="botNote">ربات متوقف است.</p>
 </section>
@@ -268,44 +263,50 @@ button:disabled{
 const $ = id => document.getElementById(id);
 
 const symbols = {
-  "EUR/USD":"EURUSD",
-  "XAU/USD":"XAUUSD",
-  "GBP/USD":"GBPUSD",
-  "USD/JPY":"USDJPY"
+  "EUR/USD": "EURUSD",
+  "XAU/USD": "XAUUSD",
+  "GBP/USD": "GBPUSD",
+  "USD/JPY": "USDJPY"
 };
 
 let botOn = false;
 let requestNumber = 0;
-let lastQuotes = {};
+let latestQuote = null;
 
 const priceHistory = {};
 
-async function updatePrice(){
+function clearQuoteDisplay() {
+  latestQuote = null;
+  $("price").textContent = "—";
+  $("askPrice").textContent = "—";
+  $("bidPrice").textContent = "—";
+  $("signal").textContent = "در انتظار";
+}
 
+async function updatePrice() {
   const symbol = $("symbol").value;
   const apiSymbol = symbols[symbol];
   const thisRequest = ++requestNumber;
 
+  clearQuoteDisplay();
   $("analysis").textContent = "در حال دریافت قیمت...";
-  $("signal").textContent = "در حال بررسی";
+  $("tradeNote").textContent = "در انتظار دریافت قیمت معتبر...";
 
-  try{
-
+  try {
     const response = await fetch(
-      "https://biquote.io/api/" +
-      encodeURIComponent(apiSymbol),
+      "https://biquote.io/api/" + encodeURIComponent(apiSymbol),
       {cache:"no-store"}
     );
 
-    if(!response.ok){
+    if (!response.ok) {
       throw new Error("خطای HTTP " + response.status);
     }
 
     const data = await response.json();
 
-    if(thisRequest !== requestNumber) return;
+    if (thisRequest !== requestNumber) return;
 
-    if(
+    if (
       !data ||
       typeof data.bid !== "number" ||
       typeof data.ask !== "number" ||
@@ -313,7 +314,7 @@ async function updatePrice(){
       !Number.isFinite(data.ask) ||
       data.bid <= 0 ||
       data.ask < data.bid
-    ){
+    ) {
       throw new Error("اطلاعات قیمت معتبر نیست");
     }
 
@@ -321,10 +322,21 @@ async function updatePrice(){
       typeof data.mid === "number" &&
       Number.isFinite(data.mid) &&
       data.mid > 0
-      ? data.mid
-      : (data.bid + data.ask)/2;
+        ? data.mid
+        : (data.bid + data.ask) / 2;
 
-    if(!priceHistory[symbol]){
+    const stale = data.stale === true;
+    const closed = data.marketState === "closed";
+
+    $("price").textContent = mid.toLocaleString("en-US", {
+      minimumFractionDigits:2,
+      maximumFractionDigits:5
+    });
+
+    $("askPrice").textContent = data.ask;
+    $("bidPrice").textContent = data.bid;
+
+    if (!priceHistory[symbol]) {
       priceHistory[symbol] = [];
     }
 
@@ -333,113 +345,129 @@ async function updatePrice(){
       price:mid
     });
 
-    if(priceHistory[symbol].length > 100){
+    if (priceHistory[symbol].length > 100) {
       priceHistory[symbol].shift();
     }
 
-    lastQuotes[symbol] = {
+    latestQuote = {
+      symbol,
       bid:data.bid,
       ask:data.ask,
-      mid:mid,
-      time:Date.now(),
-      stale:data.stale === true ||
-        data.marketState === "closed"
+      receivedAt:Date.now(),
+      stale,
+      closed,
+      quoteAgeSeconds:Number.isFinite(data.quoteAgeSeconds)
+        ? data.quoteAgeSeconds
+        : null
     };
 
-    $("price").textContent =
-      mid.toLocaleString("en-US",{
-        minimumFractionDigits:2,
-        maximumFractionDigits:5
-      });
-
-    $("askPrice").textContent = data.ask;
-    $("bidPrice").textContent = data.bid;
-
-    let status = "داده دریافت شد";
-
-    if(data.marketState === "closed"){
-      status = "بازار تعطیل";
-    }else if(data.stale === true){
-      status = "قیمت قدیمی";
-    }
-
-    $("signal").textContent = status;
+    $("signal").textContent = stale
+      ? "قیمت قدیمی"
+      : closed
+        ? "بازار تعطیل"
+        : "داده دریافت شد";
 
     let time = "نامشخص";
 
-    if(data.timestamp){
+    if (data.timestamp) {
       const date = new Date(data.timestamp);
-
-      if(!Number.isNaN(date.getTime())){
+      if (!Number.isNaN(date.getTime())) {
         time = date.toLocaleString("fa-IR");
       }
     }
 
-    let age = "";
-
-    if(Number.isFinite(data.quoteAgeSeconds)){
-      age = " | سن قیمت: " +
-        Math.floor(data.quoteAgeSeconds/60) +
-        " دقیقه";
-    }
+    const age = latestQuote.quoteAgeSeconds !== null
+      ? " | سن قیمت: " + latestQuote.quoteAgeSeconds + " ثانیه"
+      : "";
 
     $("analysis").textContent =
       "نماد: " + symbol +
-      " | زمان قیمت: " + time +
+      " | ASK: " + data.ask +
+      " | BID: " + data.bid +
+      " | زمان: " + time +
       age +
       " | منبع: " + (data.source || "نامشخص") +
-      " | وضعیت بازار: " +
-      (data.marketState || "نامشخص") +
-      ". قیمت قدیمی، قیمت زنده نیست.";
+      " | وضعیت بازار: " + (data.marketState || "نامشخص");
 
-  }catch(error){
+    if (stale || closed) {
+      $("tradeNote").textContent =
+        "قیمت قدیمی است یا بازار تعطیل است؛ برای تصمیم معاملاتی از آن استفاده نکن.";
+    } else {
+      $("tradeNote").textContent =
+        "قیمت دریافت شد. دکمه‌ها فقط انتخاب نمایشی انجام می‌دهند و سفارش ارسال نمی‌کنند.";
+    }
 
-    if(thisRequest !== requestNumber) return;
+  } catch (error) {
+    if (thisRequest !== requestNumber) return;
 
-    const last = lastQuotes[symbol];
-
-    $("price").textContent = last
-      ? last.mid.toLocaleString("en-US",{
-          minimumFractionDigits:2,
-          maximumFractionDigits:5
-        })
-      : "—";
-
-    $("askPrice").textContent = last ? last.ask : "—";
-    $("bidPrice").textContent = last ? last.bid : "—";
-
-    $("signal").textContent = last
-      ? "خطا - قیمت قبلی"
-      : "بدون داده";
+    latestQuote = null;
+    $("signal").textContent = "بدون داده";
 
     let message = error.message;
 
-    if(message.includes("404")){
-      message = "نماد پیدا نشد یا قیمت در دسترس نیست.";
-    }else if(message.includes("503")){
+    if (message.includes("404")) {
+      message = "نماد پیدا نشد یا سرویس برای آن داده ندارد.";
+    } else if (message.includes("503")) {
       message = "سرویس قیمت موقتاً در دسترس نیست.";
     }
 
     $("analysis").textContent =
-      "دریافت قیمت ناموفق بود. " + message +
-      (last
-        ? " آخرین قیمت قبلی نمایش داده شده و زنده نیست."
-        : " هنوز قیمت معتبری نداریم.");
+      "دریافت قیمت ناموفق بود: " + message;
+
+    $("tradeNote").textContent =
+      "قیمت معتبر نداریم؛ خرید و فروش قابل بررسی نیست.";
   }
 }
 
-function calculateRisk(){
+function selectTrade(direction) {
+  if (!latestQuote) {
+    $("tradeNote").textContent =
+      "قیمت معتبر دریافت نشده است. ابتدا قیمت را به‌روزرسانی کن.";
+    return;
+  }
 
+  const elapsed =
+    (Date.now() - latestQuote.receivedAt) / 1000;
+
+  const oldProviderQuote =
+    latestQuote.quoteAgeSeconds !== null &&
+    latestQuote.quoteAgeSeconds > 60;
+
+  if (
+    latestQuote.stale ||
+    latestQuote.closed ||
+    elapsed > 60 ||
+    oldProviderQuote
+  ) {
+    $("tradeNote").textContent =
+      "قیمت قدیمی است یا بازار تعطیل است. معامله انجام نمی‌شود.";
+    return;
+  }
+
+  const selectedPrice =
+    direction === "BUY"
+      ? latestQuote.ask
+      : latestQuote.bid;
+
+  $("tradeNote").textContent =
+    "انتخاب نمایشی " +
+    (direction === "BUY" ? "خرید" : "فروش") +
+    " برای " + latestQuote.symbol +
+    " با قیمت " + selectedPrice +
+    ". هیچ سفارشی به MT5 ارسال نشده است.";
+}
+
+function calculateRisk() {
   const capital = Number($("capital").value);
   const risk = Number($("risk").value);
 
-  if(
+  if (
     !Number.isFinite(capital) ||
     capital <= 0 ||
     !Number.isFinite(risk) ||
     risk < 0.1 ||
     risk > 2
-  ){
+  ) {
     $("riskValue").textContent = "ورودی نامعتبر";
     $("riskNote").textContent =
       "سرمایه باید بیشتر از صفر و ریسک بین ۰٫۱ تا ۲ درصد باشد.";
@@ -449,90 +477,56 @@ function calculateRisk(){
   const amount = capital * risk / 100;
 
   $("riskValue").textContent =
-    amount.toLocaleString("fa-IR",{
+    amount.toLocaleString("fa-IR", {
       maximumFractionDigits:2
     }) + " دلار";
 
   $("riskNote").textContent =
-    "محاسبه آموزشی است؛ هیچ معامله‌ای ثبت نمی‌شود.";
+    "محاسبه آموزشی است و سفارش معاملاتی ثبت نمی‌کند.";
 }
 
-function setBot(on){
-
+function setBot(on) {
   botOn = on;
 
   $("botStatus").textContent =
     botOn ? "روشن آزمایشی" : "خاموش";
 
   $("toggle").textContent =
-    botOn
-    ? "خاموش کردن حالت آزمایشی"
-    : "شروع حالت آزمایشی";
+    botOn ? "خاموش کردن حالت آزمایشی" : "شروع حالت آزمایشی";
 
   $("botNote").textContent = botOn
     ? "حالت نمایشی روشن است؛ هیچ معامله‌ای انجام نمی‌شود."
     : "ربات متوقف است.";
 }
 
-function selectTrade(direction){
+$("symbol").addEventListener("change", updatePrice);
+$("analyze").addEventListener("click", updatePrice);
 
-  const symbol = $("symbol").value;
-  const quote = lastQuotes[symbol];
-
-  if(!quote){
-    $("tradeNote").textContent =
-      "ابتدا قیمت معتبر دریافت کن. هنوز سفارشی ارسال نشده است.";
-    return;
-  }
-
-  if(quote.stale || Date.now() - quote.time > 60000){
-    $("tradeNote").textContent =
-      "قیمت قدیمی است. برای انتخاب معامله، ابتدا قیمت تازه دریافت کن.";
-    return;
-  }
-
-  $("tradeNote").textContent =
-    (direction === "BUY" ? "خرید" : "فروش") +
-    " انتخاب شد | نماد: " + symbol +
-    " | قیمت: " +
-    (direction === "BUY" ? quote.ask : quote.bid) +
-    " | این فقط انتخاب نمایشی است و سفارش ارسال نشده است.";
-}
-
-$("symbol").addEventListener("change",function(){
-  $("price").textContent = "—";
-  $("askPrice").textContent = "—";
-  $("bidPrice").textContent = "—";
-  $("signal").textContent = "در انتظار";
-  updatePrice();
-});
-
-$("analyze").addEventListener("click",updatePrice);
-
-$("capital").addEventListener("input",calculateRisk);
-$("risk").addEventListener("input",calculateRisk);
-
-$("buyButton").addEventListener("click",function(){
+$("buyButton").addEventListener("click", function() {
   selectTrade("BUY");
 });
 
-$("sellButton").addEventListener("click",function(){
+$("sellButton").addEventListener("click", function() {
   selectTrade("SELL");
 });
 
-$("toggle").addEventListener("click",function(){
+$("capital").addEventListener("input", calculateRisk);
+$("risk").addEventListener("input", calculateRisk);
+
+$("toggle").addEventListener("click", function() {
   setBot(!botOn);
 });
 
-$("stop").addEventListener("click",function(){
+$("stop").addEventListener("click", function() {
   setBot(false);
+  $("tradeNote").textContent = "حالت آزمایشی متوقف شد.";
 });
 
 calculateRisk();
 updatePrice();
 
-setInterval(updatePrice,30000);
-
+setInterval(updatePrice, 30000);
 </script>
+
 </body>
 </html>
