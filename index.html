@@ -341,3 +341,36 @@ setInterval(updatePrice, 30000);
 </script>
 </body>
 </html>
+<section class="card">
+  <h2>خرید و فروش</h2>
+
+  <div class="grid">
+    <div>
+      <div class="muted">قیمت خرید (ASK)</div>
+      <div class="value" id="askPrice">—</div>
+    </div>
+    <div>
+      <div class="muted">قیمت فروش (BID)</div>
+      <div class="value" id="bidPrice">—</div>
+    </div>
+  </div>
+
+  <div class="trade-actions">
+    <button type="button"
+      class="trade-button buy"
+      id="buyButton">
+      ↑ خرید BUY
+    </button>
+
+    <button type="button"
+      class="trade-button sell"
+      id="sellButton">
+      ↓ فروش SELL
+    </button>
+  </div>
+
+  <div class="trade-note notice"
+       id="tradeNote" aria-live="polite">
+    برای معامله واقعی ابتدا باید اتصال امن MT5 برقرار شود.
+  </div>
+</section>
