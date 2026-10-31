@@ -195,6 +195,8 @@ async function updatePrice() {
       priceHistory[symbol] = [];
     }
 
+    $("askPrice").textContent = data.ask;
+$("bidPrice").textContent = data.bid;
     priceHistory[symbol].push({
       time: Date.now(),
       price: mid
