@@ -3,13 +3,24 @@
   "id": "./",
   "name": "همراه تریدر",
   "short_name": "همراه تریدر",
-  "description": "برنامه همراه تریدر برای مشاهده قیمت زنده بازار، تحلیل و مدیریت ریسک معاملات",
+  "description": "سامانه مشاهده قیمت زنده و تحلیل بازارهای مالی",
   "lang": "fa",
   "dir": "rtl",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "orientation": "portrait",
   "background_color": "#101827",
-  "theme_color": "#101827"
+  "theme_color": "#101827",
+  "icons": [
+    {
+      "src": "./icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "./icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
 }
