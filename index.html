@@ -6,115 +6,45 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#101827">
 <title>همراه تریدر</title>
-
 <style>
-:root{
-  color-scheme:dark;
-  --bg:#101827;
-  --panel:#182337;
-  --line:#2c3a50;
-  --text:#edf4ff;
-  --muted:#9aabc2;
-  --blue:#7dd3fc;
-  --green:#22c55e;
-  --red:#ef4444;
-  --yellow:#facc15;
-}
+:root{color-scheme:dark;--bg:#101827;--panel:#182337;--line:#2c3a50;--text:#edf4ff;--muted:#9aabc2;--blue:#7dd3fc;--green:#22c55e;--red:#ef4444;--yellow:#facc15}
 *{box-sizing:border-box}
-body{
-  margin:0;
-  padding:16px;
-  padding-bottom:35px;
-  background:var(--bg);
-  color:var(--text);
-  font-family:Tahoma,Arial,sans-serif;
-}
+body{margin:0;padding:15px 14px 35px;background:var(--bg);color:var(--text);font-family:Tahoma,Arial,sans-serif}
 header{text-align:center;margin:8px 0 20px}
 h1{font-size:25px;color:var(--blue);margin:10px}
-.subtitle{color:var(--muted);font-size:12px}
-.card{
-  background:var(--panel);
-  border:1px solid var(--line);
-  border-radius:15px;
-  padding:15px;
-  margin-bottom:13px;
-}
 h2{font-size:16px;margin:0 0 13px;color:var(--blue)}
-label{display:block;color:var(--muted);font-size:13px;margin-bottom:8px}
-select,input,button{
-  width:100%;
-  padding:13px;
-  border-radius:10px;
-  border:1px solid var(--line);
-  background:#101827;
-  color:var(--text);
-  font-size:15px;
-  margin-bottom:12px;
-}
-button{
-  background:#1675ad;
-  border:0;
-  font-weight:bold;
-  cursor:pointer;
-}
+.subtitle,.info{color:var(--muted);font-size:12px;line-height:2}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:15px;padding:15px;margin-bottom:13px}
+label{display:block;color:var(--muted);font-size:13px;margin:5px 0 8px}
+select,input,button{width:100%;padding:13px;border-radius:10px;border:1px solid var(--line);background:#101827;color:var(--text);font-size:15px;margin-bottom:12px}
+button{background:#1675ad;border:0;font-weight:bold;cursor:pointer}
+button:disabled{opacity:.45;cursor:not-allowed}
 button:active{opacity:.75}
-.price{
-  font-size:30px;
-  font-weight:bold;
-  direction:ltr;
-  text-align:center;
-  margin:14px 0;
-  color:var(--blue);
-}
-.grid{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:10px;
-}
-.stat{
-  background:#101827;
-  padding:12px;
-  border-radius:10px;
-  text-align:center;
-  min-width:0;
-}
+button.buy{background:#16834b}
+button.sell{background:#a92e3b}
+button.close{background:#6b7280}
+.price{font-size:30px;font-weight:bold;direction:ltr;text-align:center;margin:14px 0;color:var(--blue)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.stat{background:#101827;padding:12px;border-radius:10px;text-align:center;min-width:0}
 .stat small{display:block;color:var(--muted);margin-bottom:8px}
 .stat strong{font-size:16px;direction:ltr;display:block;overflow-wrap:anywhere}
-.status{font-size:13px;text-align:center;color:var(--muted)}
-.good{color:var(--green)}
-.bad{color:var(--red)}
-.warning{color:var(--yellow)}
-.result{
-  font-size:17px;
-  font-weight:bold;
-  text-align:center;
-  padding:13px;
-  background:#101827;
-  border-radius:10px;
-  margin:10px 0;
-}
-.info{font-size:12px;color:var(--muted);line-height:2}
-canvas{
-  width:100%;
-  height:170px;
-  background:#101827;
-  border-radius:10px;
-}
-footer{
-  text-align:center;
-  color:var(--muted);
-  font-size:11px;
-  margin-top:20px;
-  line-height:2;
-}
+.status{font-size:13px;text-align:center;color:var(--muted);line-height:1.8}
+.good{color:var(--green)!important}
+.bad{color:var(--red)!important}
+.warning{color:var(--yellow)!important}
+.result{font-size:16px;font-weight:bold;text-align:center;padding:13px;background:#101827;border-radius:10px;margin:10px 0}
+.info{margin:8px 0}
+canvas{display:block;width:100%;height:170px;background:#101827;border-radius:10px}
+.trade-buttons{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.trade-buttons button{margin-bottom:5px}
+footer{text-align:center;color:var(--muted);font-size:11px;margin-top:20px;line-height:2}
 </style>
 </head>
-
 <body>
 
 <header>
 <h1>📈 همراه تریدر</h1>
-<div class="subtitle">سامانه مشاهده قیمت زنده و تحلیل آموزشی بازار</div>
+<div class="subtitle">قیمت زنده، تحلیل بازار و معاملات آزمایشی</div>
 </header>
 
 <div class="card">
@@ -126,7 +56,6 @@ footer{
 <option value="GBP/USD">GBP/USD - پوند دلار</option>
 <option value="USD/JPY">USD/JPY - دلار ین</option>
 </select>
-
 <button id="refreshBtn" onclick="updatePrice()">🔄 دریافت قیمت زنده</button>
 <div id="status" class="status">آماده دریافت اطلاعات</div>
 </div>
@@ -135,22 +64,10 @@ footer{
 <h2>قیمت لحظه‌ای</h2>
 <div id="price" class="price">---</div>
 <div class="grid">
-<div class="stat">
-<small>قیمت خرید (Bid)</small>
-<strong id="bid">---</strong>
-</div>
-<div class="stat">
-<small>قیمت فروش (Ask)</small>
-<strong id="ask">---</strong>
-</div>
-<div class="stat">
-<small>اختلاف قیمت</small>
-<strong id="spread">---</strong>
-</div>
-<div class="stat">
-<small>وضعیت بازار</small>
-<strong id="market">---</strong>
-</div>
+<div class="stat"><small>قیمت خرید (Bid)</small><strong id="bid">---</strong></div>
+<div class="stat"><small>قیمت فروش (Ask)</small><strong id="ask">---</strong></div>
+<div class="stat"><small>اختلاف قیمت</small><strong id="spread">---</strong></div>
+<div class="stat"><small>وضعیت بازار</small><strong id="market">---</strong></div>
 </div>
 <p class="info" id="source">منبع داده: در انتظار دریافت</p>
 <p class="info" id="lastUpdate">آخرین بروزرسانی: ---</p>
@@ -159,61 +76,73 @@ footer{
 <div class="card">
 <h2>📊 نمودار تغییرات قیمت</h2>
 <canvas id="chart" width="600" height="260"></canvas>
-<p class="info">نمودار بر اساس قیمت‌های دریافت‌شده در همین اجرای برنامه است.</p>
+<p class="info">نمودار از نمونه قیمت‌های دریافتی در همین اجرای برنامه ساخته می‌شود؛ تاریخچه کندل رسمی نیست.</p>
 </div>
 
 <div class="card">
-<h2>تحلیل روند بازار</h2>
+<h2>تحلیل هوشمند بازار</h2>
 <div class="grid">
-<div class="stat">
-<small>روند کوتاه‌مدت</small>
-<strong id="trend">---</strong>
+<div class="stat"><small>روند EMA</small><strong id="trend">---</strong></div>
+<div class="stat"><small>شاخص RSI</small><strong id="rsi">---</strong></div>
 </div>
-<div class="stat">
-<small>شاخص RSI</small>
-<strong id="rsi">---</strong>
-</div>
-</div>
-<div id="signal" class="result">در انتظار اطلاعات کافی</div>
+<div id="signal" class="result warning">در انتظار اطلاعات کافی</div>
 <p class="info" id="analysis">برای تحلیل، اطلاعات قیمت بیشتری لازم است.</p>
+<p class="info">استراتژی: تقاطع EMA 9 و EMA 21 همراه با فیلتر RSI 14. نمونه‌ها هر ۳۰ ثانیه دریافت می‌شوند.</p>
 </div>
 
 <div class="card">
-<h2>مدیریت ریسک معامله</h2>
-<label for="balance">موجودی حساب (دلار)</label>
-<input id="balance" type="number" min="0" value="1000">
+<h2>معاملات آزمایشی</h2>
+<div class="grid">
+<div class="stat"><small>موجودی مجازی</small><strong id="paperBalance">10,000</strong></div>
+<div class="stat"><small>وضعیت ایجنت</small><strong id="agentStatus" class="good">فعال</strong></div>
+</div>
+<p class="info">خرید و فروش زیر فقط در حساب مجازی برنامه ثبت می‌شود و به بروکر ارسال نمی‌شود.</p>
+<div class="trade-buttons">
+<button class="buy" id="buyBtn" onclick="openPaperTrade('BUY')">خرید آزمایشی</button>
+<button class="sell" id="sellBtn" onclick="openPaperTrade('SELL')">فروش آزمایشی</button>
+</div>
+<div id="positionBox" class="result warning">در حال حاضر معامله بازی ندارید.</div>
+<div id="positionDetails" class="info"></div>
+<button class="close" id="closeBtn" onclick="closePaperTrade()" style="display:none">بستن معامله آزمایشی</button>
+<p class="info" id="tradeMessage">پس از دریافت داده کافی، سیگنال‌های خرید و فروش در بخش تحلیل نمایش داده می‌شوند.</p>
+</div>
 
-<label for="risk">درصد ریسک مجاز هر معامله</label>
+<div class="card">
+<h2>تاریخچه معاملات آزمایشی</h2>
+<div id="tradeHistory" class="info">هنوز معامله‌ای ثبت نشده است.</div>
+</div>
+
+<div class="card">
+<h2>مدیریت ریسک</h2>
+<label for="balance">موجودی دلخواه برای محاسبه (دلار)</label>
+<input id="balance" type="number" min="0" value="1000">
+<label for="risk">درصد ریسک مجاز</label>
 <select id="risk">
 <option value="0.5">۰٫۵ درصد</option>
 <option value="1" selected>۱ درصد</option>
 <option value="2">۲ درصد</option>
 </select>
-
 <button onclick="calculateRisk()">محاسبه مدیریت ریسک</button>
 <div class="result" id="riskResult">مبلغ ریسک: ---</div>
-<p class="info">این محاسبه آموزشی است و حجم لات، ارزش هر پیپ و حد ضرر واقعی باید بر اساس مشخصات نماد و بروکر تعیین شوند.</p>
+<p class="info">این محاسبه آموزشی است. حجم لات، ارزش پیپ، ارز پایه و مشخصات قرارداد بروکر در آن لحاظ نشده است.</p>
 </div>
 
 <div class="card">
 <h2>وضعیت اتصال</h2>
 <div id="connection" class="status">در انتظار اتصال به سرویس قیمت</div>
-<p class="info">
-بروزرسانی خودکار هر ۳۰ ثانیه انجام می‌شود.
-قیمت‌ها از سرویس بیرونی دریافت می‌شوند و ممکن است با قیمت بروکر MT5 متفاوت باشند.
-</p>
+<p class="info">قیمت‌ها از سرویس بیرونی دریافت می‌شوند و ممکن است با قیمت بروکر MT5 متفاوت باشند. بروزرسانی خودکار هر ۳۰ ثانیه انجام می‌شود.</p>
 </div>
 
 <footer>
-همراه تریدر | نسخه به‌روزرسانی‌شده<br>
-ابزار آموزشی تحلیل بازار - بدون اجرای خودکار معامله
+همراه تریدر | نسخه آزمایشی ایجنت<br>
+بدون ارسال سفارش واقعی به بروکر
 </footer>
+
 <script src="./agent.js"></script>
 <script>
 "use strict";
 
 const $ = id => document.getElementById(id);
-
 const symbols = {
   "EUR/USD":"EURUSD",
   "XAU/USD":"XAUUSD",
@@ -221,20 +150,22 @@ const symbols = {
   "USD/JPY":"USDJPY"
 };
 
-let requestNumber = 0;
-let priceHistory = [];
-let timer = null;
+let requestNumber=0;
+let priceHistory=[];
+let timer=null;
+let currentPrice=null;
+let currentSymbol=$("symbol").value;
 
-function formatNumber(value){
+function formatNumber(value,digits=6){
   return Number(value).toLocaleString("en-US",{
-    maximumFractionDigits:6,
+    maximumFractionDigits:digits,
     minimumFractionDigits:2
   });
 }
 
-function setStatus(message, type=""){
-  $("status").textContent = message;
-  $("status").className = "status " + type;
+function setStatus(message,type=""){
+  $("status").textContent=message;
+  $("status").className="status "+type;
 }
 
 function resetDisplay(){
@@ -246,8 +177,10 @@ function resetDisplay(){
   $("trend").textContent="---";
   $("rsi").textContent="---";
   $("signal").textContent="در انتظار اطلاعات";
+  $("signal").className="result warning";
   $("analysis").textContent="در حال دریافت اطلاعات بازار...";
   priceHistory=[];
+  currentPrice=null;
   drawChart();
 }
 
@@ -255,262 +188,268 @@ async function updatePrice(){
   const symbol=$("symbol").value;
   const apiSymbol=symbols[symbol];
   const thisRequest=++requestNumber;
-
   $("refreshBtn").disabled=true;
   setStatus("در حال دریافت قیمت...");
 
   try{
     const controller=new AbortController();
     const timeout=setTimeout(()=>controller.abort(),15000);
-
     let response;
-
     try{
       response=await fetch(
-        "https://biquote.io/api/"+
-        encodeURIComponent(apiSymbol)+
-        "?allowStale=false",
-        {
-          method:"GET",
-          cache:"no-store",
-          signal:controller.signal
-        }
+        "https://biquote.io/api/"+encodeURIComponent(apiSymbol)+"?allowStale=false",
+        {method:"GET",cache:"no-store",signal:controller.signal}
       );
     }finally{
       clearTimeout(timeout);
     }
 
     if(thisRequest!==requestNumber)return;
-
-    if(!response.ok){
-      throw new Error("خطای سرویس قیمت: "+response.status);
-    }
+    if(!response.ok)throw new Error("خطای سرویس قیمت: "+response.status);
 
     const data=await response.json();
-
     if(thisRequest!==requestNumber)return;
-
-    if(!data || typeof data!=="object"){
-      throw new Error("پاسخ سرویس معتبر نیست");
-    }
-
-    if(data.stale===true){
-      throw new Error("قیمت دریافتی قدیمی است");
-    }
+    if(!data||typeof data!=="object")throw new Error("پاسخ سرویس معتبر نیست");
+    if(data.stale===true)throw new Error("قیمت دریافتی قدیمی است");
 
     const bid=Number(data.bid);
     const ask=Number(data.ask);
-
-    if(
-      !Number.isFinite(bid) ||
-      !Number.isFinite(ask) ||
-      bid<=0 ||
-      ask<=0 ||
-      ask<bid
-    ){
+    if(!Number.isFinite(bid)||!Number.isFinite(ask)||bid<=0||ask<=0||ask<bid){
       throw new Error("اطلاعات قیمت معتبر نیست");
     }
 
-    const mid=Number.isFinite(Number(data.mid)) &&
-      Number(data.mid)>0
-      ? Number(data.mid)
-      : (bid+ask)/2;
+    const mid=Number.isFinite(Number(data.mid))&&Number(data.mid)>0
+      ?Number(data.mid):(bid+ask)/2;
 
+    currentPrice=mid;
     $("price").textContent=formatNumber(mid);
     $("bid").textContent=formatNumber(bid);
     $("ask").textContent=formatNumber(ask);
     $("spread").textContent=formatNumber(ask-bid);
 
-    const marketState=String(data.marketState || "نامشخص");
-    $("market").textContent=
-      marketState==="open" ? "باز" :
-      marketState==="closed" ? "بسته" : marketState;
+    const marketState=String(data.marketState||"نامشخص");
+    $("market").textContent=marketState==="open"?"باز":
+      marketState==="closed"?"بسته":marketState;
 
-    $("source").textContent=
-      "منبع داده: "+(data.source || "سرویس قیمت");
+    $("source").textContent="منبع داده: "+(data.source||"سرویس قیمت");
+    $("lastUpdate").textContent="آخرین بروزرسانی: "+new Date().toLocaleTimeString("fa-IR");
 
-    $("lastUpdate").textContent=
-      "آخرین بروزرسانی: "+new Date().toLocaleTimeString("fa-IR");
-
+    const sampleTime=Math.floor(Date.now()/30000);
     const previous=priceHistory[priceHistory.length-1];
 
-    if(!previous || previous.time!==Math.floor(Date.now()/30000)){
-      priceHistory.push({
-        price:mid,
-        time:Math.floor(Date.now()/30000)
-      });
+    if(!previous||previous.time!==sampleTime){
+      priceHistory.push({price:mid,time:sampleTime});
     }else{
       previous.price=mid;
     }
 
-    if(priceHistory.length>100){
-      priceHistory.shift();
-    }
+    if(priceHistory.length>300)priceHistory.shift();
 
     drawChart();
     analyzeMarket();
+    checkPaperPosition(mid);
 
     setStatus("قیمت با موفقیت دریافت شد","good");
     $("connection").textContent="اتصال به سرویس قیمت برقرار است";
     $("connection").className="status good";
+    updatePaperUI();
 
   }catch(error){
     if(thisRequest!==requestNumber)return;
-
     console.error(error);
     setStatus("خطا: "+error.message,"bad");
     $("connection").textContent="دریافت اطلاعات ناموفق بود";
     $("connection").className="status bad";
-
-    $("analysis").textContent=
-      "اتصال برقرار نشد. اینترنت و دسترسی سرویس قیمت را بررسی کنید.";
+    $("analysis").textContent="اتصال برقرار نشد. اینترنت و دسترسی سرویس قیمت را بررسی کنید.";
   }finally{
-    if(thisRequest===requestNumber){
-      $("refreshBtn").disabled=false;
-    }
+    if(thisRequest===requestNumber)$("refreshBtn").disabled=false;
   }
-}
-
-function calculateRSI(values){
-  if(values.length<15)return null;
-
-  let gains=0;
-  let losses=0;
-
-  for(let i=values.length-14;i<values.length;i++){
-    const change=values[i]-values[i-1];
-
-    if(change>0)gains+=change;
-    else losses+=Math.abs(change);
-  }
-
-  if(losses===0)return 100;
-
-  const rs=(gains/14)/(losses/14);
-  return 100-(100/(1+rs));
 }
 
 function analyzeMarket(){
   const values=priceHistory.map(x=>x.price);
-
-  if(values.length<5){
-    $("analysis").textContent=
-      "برای تحلیل روند حداقل ۵ نمونه قیمت لازم است.";
-    $("signal").textContent="در انتظار داده بیشتر";
+  if(!window.HamrahTraderAgent){
+    $("signal").textContent="ایجنت بارگذاری نشده";
+    $("analysis").textContent="فایل agent.js در دسترس نیست.";
     return;
   }
 
-  const recent=values.slice(-5);
-  const older=values.slice(-10,-5);
+  const result=window.HamrahTraderAgent.analyze(values);
+  $("rsi").textContent=result.rsi!==undefined?Number(result.rsi).toFixed(1):"---";
 
-  const average=a=>a.reduce((x,y)=>x+y,0)/a.length;
+  $("trend").textContent=result.emaFast!==undefined
+    ?(result.emaFast>result.emaSlow?"صعودی":
+      result.emaFast<result.emaSlow?"نزولی":"خنثی"):"---";
 
-  const shortAvg=average(recent);
-  const oldAvg=older.length?average(older):shortAvg;
+  const labels={BUY:"سیگنال خرید آزمایشی",SELL:"سیگنال فروش آزمایشی",WAIT:"فعلاً بدون سیگنال"};
+  $("signal").textContent=labels[result.signal]||"در انتظار تحلیل";
+  $("signal").className="result "+(result.signal==="BUY"?"good":
+    result.signal==="SELL"?"bad":"warning");
 
-  const rsi=calculateRSI(values);
+  $("analysis").textContent=result.message+
+    (result.emaFast!==undefined
+      ?" | EMA 9: "+result.emaFast+" | EMA 21: "+result.emaSlow
+      :" | برای تحلیل EMA به حداقل ۲۳ نمونه قیمت نیاز است.");
+}
 
-  let trend="خنثی";
-  if(shortAvg>oldAvg)trend="صعودی";
-  if(shortAvg<oldAvg)trend="نزولی";
+function openPaperTrade(side){
+  if(!window.HamrahTraderAgent||!currentPrice){
+    $("tradeMessage").textContent="ابتدا قیمت زنده را دریافت کنید.";
+    return;
+  }
+  const existing=window.HamrahTraderAgent.getStatus().position;
+  if(existing){
+    $("tradeMessage").textContent="ابتدا معامله باز فعلی را ببندید.";
+    return;
+  }
+  const sideText=side==="BUY"?"خرید":"فروش";
+  if(!confirm("ثبت "+sideText+" آزمایشی در قیمت "+formatNumber(currentPrice)+"؟"))return;
 
-  $("trend").textContent=trend;
-  $("rsi").textContent=rsi===null?"داده ناکافی":rsi.toFixed(1);
+  try{
+    const symbol=symbols[$("symbol").value];
+    const position=window.HamrahTraderAgent.openTrade(side,currentPrice,symbol);
+    $("tradeMessage").textContent="معامله "+sideText+" آزمایشی ثبت شد.";
+    updatePaperUI();
+  }catch(error){
+    $("tradeMessage").textContent=error.message;
+  }
+}
 
-  let signal="بدون سیگنال";
-  let explanation="شرایط بازار برای ارائه سیگنال روشن کافی نیست.";
-  let color="warning";
+function closePaperTrade(){
+  if(!window.HamrahTraderAgent||!currentPrice)return;
+  if(!confirm("معامله آزمایشی با قیمت فعلی بسته شود؟"))return;
+  try{
+    const trade=window.HamrahTraderAgent.closeTrade(currentPrice,"MANUAL");
+    $("tradeMessage").textContent="معامله بسته شد. سود/زیان تخمینی: "+formatNumber(trade.pnl,2);
+    updatePaperUI();
+  }catch(error){
+    $("tradeMessage").textContent=error.message;
+  }
+}
 
-  if(rsi!==null && trend==="صعودی" && rsi<70){
-    signal="تمایل به خرید";
-    explanation="روند کوتاه‌مدت صعودی است. قبل از هر تصمیم، حمایت، مقاومت و حد ضرر بررسی شود.";
-    color="good";
-  }else if(rsi!==null && trend==="نزولی" && rsi>30){
-    signal="تمایل به فروش";
-    explanation="روند کوتاه‌مدت نزولی است. قبل از هر تصمیم، حمایت، مقاومت و حد ضرر بررسی شود.";
-    color="bad";
-  }else if(rsi!==null && rsi>=70){
-    signal="احتمال اشباع خرید";
-    explanation="RSI به محدوده بالای ۷۰ رسیده است؛ احتمال اصلاح قیمت وجود دارد.";
-  }else if(rsi!==null && rsi<=30){
-    signal="احتمال اشباع فروش";
-    explanation="RSI به محدوده زیر ۳۰ رسیده است؛ احتمال برگشت قیمت وجود دارد.";
+function checkPaperPosition(price){
+  if(!window.HamrahTraderAgent)return;
+  const status=window.HamrahTraderAgent.getStatus();
+  if(!status.position)return;
+  if(status.position.symbol!==symbols[$("symbol").value])return;
+  const closed=window.HamrahTraderAgent.checkPrice(price);
+  if(closed){
+    $("tradeMessage").textContent=
+      "معامله با "+(closed.reason==="STOP_LOSS"?"حد ضرر":"حد سود")+
+      " بسته شد. نتیجه تخمینی: "+formatNumber(closed.pnl,2);
+    updatePaperUI();
+  }
+}
+
+function updatePaperUI(){
+  if(!window.HamrahTraderAgent)return;
+  const state=window.HamrahTraderAgent.getStatus();
+  $("paperBalance").textContent=formatNumber(state.balance,2);
+  $("agentStatus").textContent=state.running?"فعال":"متوقف";
+  $("agentStatus").className=state.running?"good":"bad";
+
+  if(state.position){
+    const p=state.position;
+    $("positionBox").textContent="معامله باز: "+(p.side==="BUY"?"خرید":"فروش")+" | "+p.symbol;
+    $("positionBox").className="result warning";
+    $("positionDetails").textContent=
+      "ورود: "+formatNumber(p.entry)+
+      " | حد ضرر: "+formatNumber(p.stopLoss)+
+      " | حد سود: "+formatNumber(p.takeProfit);
+    $("closeBtn").style.display="block";
+    $("symbol").value=Object.keys(symbols).find(k=>symbols[k]===p.symbol)||$("symbol").value;
+    $("symbol").disabled=true;
+    $("buyBtn").disabled=true;
+    $("sellBtn").disabled=true;
+  }else{
+    $("positionBox").textContent="در حال حاضر معامله بازی ندارید.";
+    $("positionBox").className="result warning";
+    $("positionDetails").textContent="";
+    $("closeBtn").style.display="none";
+    $("symbol").disabled=false;
+    $("buyBtn").disabled=false;
+    $("sellBtn").disabled=false;
   }
 
-  $("signal").textContent=signal;
-  $("signal").className="result "+color;
-  $("analysis").textContent=explanation;
+  if(state.trades.length){
+    $("tradeHistory").innerHTML=state.trades.slice(0,10).map(t=>{
+      const side=t.side==="BUY"?"خرید":"فروش";
+      const color=t.pnl>=0?"good":"bad";
+      return '<div style="border-bottom:1px solid #2c3a50;padding:9px 0">'+
+        side+" "+t.symbol+" | ورود: "+formatNumber(t.entry)+
+        " | خروج: "+formatNumber(t.exit)+
+        ' | <span class="'+color+'">نتیجه تخمینی: '+formatNumber(t.pnl,2)+"</span></div>";
+    }).join("");
+  }else{
+    $("tradeHistory").textContent="هنوز معامله‌ای ثبت نشده است.";
+  }
 }
 
 function calculateRisk(){
   const balance=Number($("balance").value);
   const risk=Number($("risk").value);
-
   if(!Number.isFinite(balance)||balance<=0){
     $("riskResult").textContent="موجودی حساب را صحیح وارد کنید.";
     return;
   }
-
-  const amount=balance*risk/100;
-
-  $("riskResult").textContent=
-    "حداکثر ریسک پیشنهادی: "+formatNumber(amount)+" دلار";
+  $("riskResult").textContent="حداکثر ریسک پیشنهادی: "+formatNumber(balance*risk/100,2)+" دلار";
 }
 
 function drawChart(){
   const canvas=$("chart");
   const ctx=canvas.getContext("2d");
-  const w=canvas.width;
-  const h=canvas.height;
-
+  const w=canvas.width,h=canvas.height;
   ctx.clearRect(0,0,w,h);
   ctx.strokeStyle="#2c3a50";
   ctx.lineWidth=1;
-
   for(let i=1;i<5;i++){
-    ctx.beginPath();
-    ctx.moveTo(0,i*h/5);
-    ctx.lineTo(w,i*h/5);
-    ctx.stroke();
+    ctx.beginPath();ctx.moveTo(0,i*h/5);ctx.lineTo(w,i*h/5);ctx.stroke();
   }
-
   if(priceHistory.length<2)return;
-
   const values=priceHistory.map(x=>x.price);
-  const min=Math.min(...values);
-  const max=Math.max(...values);
-  const range=max-min || Math.abs(max)*0.0001 || 1;
-
-  ctx.beginPath();
-  ctx.strokeStyle="#7dd3fc";
-  ctx.lineWidth=3;
-
+  const min=Math.min(...values),max=Math.max(...values);
+  const range=max-min||Math.abs(max)*0.0001||1;
+  ctx.beginPath();ctx.strokeStyle="#7dd3fc";ctx.lineWidth=3;
   values.forEach((value,index)=>{
     const x=20+index*(w-40)/(values.length-1);
     const y=h-20-((value-min)/range)*(h-40);
-
-    if(index===0)ctx.moveTo(x,y);
-    else ctx.lineTo(x,y);
+    if(index===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);
   });
-
   ctx.stroke();
 }
 
 $("symbol").addEventListener("change",()=>{
+  const state=window.HamrahTraderAgent?.getStatus();
+  if(state&&state.position){
+    $("symbol").value=Object.keys(symbols).find(k=>symbols[k]===state.position.symbol)||"EUR/USD";
+    return;
+  }
   requestNumber++;
-  priceHistory=[];
+  currentSymbol=$("symbol").value;
   resetDisplay();
   updatePrice();
 });
 
-updatePrice();
+if(window.HamrahTraderAgent){
+  window.HamrahTraderAgent.start();
+  updatePaperUI();
+}else{
+  $("agentStatus").textContent="بارگذاری ناموفق";
+  $("agentStatus").className="bad";
+}
 
+updatePrice();
 timer=setInterval(updatePrice,30000);
 
 document.addEventListener("visibilitychange",()=>{
-  if(!document.hidden){
-    updatePrice();
-  }
+  if(!document.hidden)updatePrice();
 });
+
+if("serviceWorker" in navigator){
+  window.addEventListener("load",()=>{
+    navigator.serviceWorker.register("./sw.js").catch(err=>console.log("SW:",err));
+  });
+}
+</script>
 </body>
 </html>
