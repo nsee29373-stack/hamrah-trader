@@ -9,7 +9,13 @@ on:
       - 'agent.js'
       - 'manifest.json'
       - 'sw.js'
+      - 'assets/**'
+      - 'css/**'
+      - 'js/**'
       - '.github/workflows/main.yml'
+
+permissions:
+  contents: read
 
 jobs:
   build:
@@ -33,6 +39,13 @@ jobs:
       - name: Install Cordova
         run: npm install -g cordova
 
+      - name: Check application files
+        run: |
+          test -f index.html
+          test -f agent.js
+          test -f manifest.json
+          test -f sw.js
+
       - name: Create Android project
         run: |
           cordova create app com.hamrahtrader.app "Hamrah Trader"
@@ -45,6 +58,11 @@ jobs:
           cp agent.js app/www/agent.js
           cp manifest.json app/www/manifest.json
           cp sw.js app/www/sw.js
+          for d in assets css js; do
+            if [ -d "$d" ]; then
+              cp -r "$d" "app/www/"
+            fi
+          done
 
       - name: Build APK
         run: |
@@ -56,3 +74,5 @@ jobs:
         with:
           name: Hamrah-Trader-APK
           path: app/platforms/android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+          retention-days: 14
