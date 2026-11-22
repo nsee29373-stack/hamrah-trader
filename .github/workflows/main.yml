@@ -5,26 +5,30 @@ on:
   workflow_dispatch:
   push:
     paths:
-      - ".github/workflows/main.yml"
+      - 'index.html'
+      - 'agent.js'
+      - 'manifest.json'
+      - 'sw.js'
+      - '.github/workflows/main.yml'
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Get project files
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up Java
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Setup Java
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: "17"
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
+          java-version: '17'
 
       - name: Install Cordova
         run: npm install -g cordova
@@ -32,18 +36,22 @@ jobs:
       - name: Create Android project
         run: |
           cordova create app com.hamrahtrader.app "Hamrah Trader"
-          cp index.html app/www/index.html
-          cp manifest.json app/www/manifest.json
-          cp sw.js app/www/sw.js
           cd app
           cordova platform add android
+
+      - name: Copy application files
+        run: |
+          cp index.html app/www/index.html
+          cp agent.js app/www/agent.js
+          cp manifest.json app/www/manifest.json
+          cp sw.js app/www/sw.js
 
       - name: Build APK
         run: |
           cd app
           cordova build android --debug
 
-      - name: Save APK
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: Hamrah-Trader-APK
