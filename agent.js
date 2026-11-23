@@ -1,11 +1,12 @@
 
 /* Hamrah Trader - Advanced Paper Trading Engine
-   Real trading permanently disabled in this version.
-*/
+ * Real-money trading is intentionally disabled.
+ * USDJPY quote PnL is converted from JPY to USD.
+ */
 (function () {
   "use strict";
 
-  const KEY = "hamrah_trader_agent_v1";
+  const STORAGE_KEY = "hamrah_trader_agent_v1";
 
   const state = {
     mode: "PAPER_ONLY",
@@ -18,184 +19,156 @@
     running: false
   };
 
-  const num = (v, fallback) => {
+  function num(v, fallback) {
     const n = Number(v);
     return Number.isFinite(n) ? n : fallback;
-  };
+  }
 
   function save() {
     try {
-      localStorage.setItem(KEY, JSON.stringify(state));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     } catch (_) {}
   }
 
   function load() {
     try {
-      const raw = localStorage.getItem(KEY);
+      const raw = localStorage.getItem(STORAGE_KEY);
       if (!raw) return;
 
-      const p = JSON.parse(raw);
-      if (!p || typeof p !== "object") return;
+      const parsed = JSON.parse(raw);
 
-      state.balance = Math.max(0, num(p.balance, 10000));
-      state.trades = Array.isArray(p.trades)
-        ? p.trades.filter(t =>
-            t && typeof t === "object" &&
-            Number.isFinite(Number(t.pnl))
-          ).slice(0, 200)
-        : [];
-
-      state.openTrade = p.openTrade &&
-        typeof p.openTrade === "object"
-        ? Object.assign({}, p.openTrade, {
-            entryPrice: num(
-              p.openTrade.entryPrice,
-              num(p.openTrade.entry, NaN)
-            )
-          })
-        : null;
-
-      if (state.openTrade &&
-          !(state.openTrade.entryPrice > 0)) {
-        state.openTrade = null;
+      if (parsed && typeof parsed === "object") {
+        state.balance = num(parsed.balance, 10000);
+        state.equity = num(parsed.equity, state.balance);
+        state.trades = Array.isArray(parsed.trades)
+          ? parsed.trades
+          : [];
+        state.openTrade = parsed.openTrade || null;
+        state.lastAnalysis = parsed.lastAnalysis || null;
+        state.running = !!parsed.running;
       }
-
-      state.equity = state.balance;
-      state.lastAnalysis = p.lastAnalysis || null;
-      state.running = false;
-
     } catch (_) {}
   }
 
+  // USDJPY is quoted in JPY.
+  // Other symbols in this application are normalized to USD.
+  function quoteCurrency(symbol) {
+    return String(symbol || "").toUpperCase() === "USDJPY"
+      ? "JPY"
+      : "USD";
+  }
+
+  // Convert quote-currency PnL to USD.
+  // For USDJPY: JPY / (JPY per USD) = USD.
+  function quoteToUsdFactor(symbol, price, suppliedFactor) {
+    const supplied = Number(suppliedFactor);
+
+    if (Number.isFinite(supplied) && supplied > 0) {
+      return supplied;
+    }
+
+    if (
+      quoteCurrency(symbol) === "JPY" &&
+      Number(price) > 0
+    ) {
+      return 1 / Number(price);
+    }
+
+    return 1;
+  }
+
   function ema(values, period) {
-    if (values.length < period) return null;
+    if (!values.length) return null;
 
     const k = 2 / (period + 1);
     let result = values[0];
 
     for (let i = 1; i < values.length; i++) {
-      result = values[i] * k + result * (1 - k);
+      result =
+        values[i] * k +
+        result * (1 - k);
     }
 
     return result;
   }
 
   function rsi(values, period) {
-    if (values.length < period + 1) return null;
+    if (values.length < period + 1) return 50;
 
     let gains = 0;
     let losses = 0;
 
-    for (let i = 1; i <= period; i++) {
-      const change = values[i] - values[i - 1];
-      if (change > 0) gains += change;
-      else losses -= change;
-    }
-
-    let avgGain = gains / period;
-    let avgLoss = losses / period;
-
-    for (let i = period + 1; i < values.length; i++) {
+    for (
+      let i = values.length - period;
+      i < values.length;
+      i++
+    ) {
       const change = values[i] - values[i - 1];
 
-      avgGain =
-        (avgGain * (period - 1) + Math.max(change, 0)) / period;
-
-      avgLoss =
-        (avgLoss * (period - 1) + Math.max(-change, 0)) / period;
+      if (change > 0) {
+        gains += change;
+      } else {
+        losses -= change;
+      }
     }
 
-    if (avgLoss === 0) {
-      return avgGain === 0 ? 50 : 100;
-    }
+    if (losses === 0) return 100;
 
-    const rs = avgGain / avgLoss;
+    const rs =
+      (gains / period) /
+      (losses / period);
+
     return 100 - (100 / (1 + rs));
   }
 
   function analyze(input) {
-    const raw = Array.isArray(input)
-      ? input
-      : input && Array.isArray(input.closes)
-        ? input.closes
-        : [];
+    const values = Array.isArray(input)
+      ? input.map(Number).filter(Number.isFinite)
+      : (
+          input && Array.isArray(input.closes)
+            ? input.closes.map(Number).filter(Number.isFinite)
+            : []
+        );
 
-    const values = raw
-      .map(Number)
-      .filter(v => Number.isFinite(v) && v > 0);
-
-    const enoughData = values.length >= 30;
-
-    const fast = enoughData ? ema(values, 9) : null;
-    const slow = enoughData ? ema(values, 21) : null;
-    const strength = enoughData ? rsi(values, 14) : null;
+    const fast = ema(values.slice(-60), 9);
+    const slow = ema(values.slice(-100), 21);
+    const strength = rsi(values, 14);
 
     let signal = "HOLD";
-    let score = 0;
-    let message = "برای تحلیل، حداقل ۳۰ داده معتبر لازم است.";
 
-    if (enoughData && fast !== null &&
-        slow !== null && strength !== null) {
-
-      const last = values[values.length - 1];
-      const previous = values[values.length - 6];
-
-      const slopePct = previous > 0
-        ? ((last - previous) / previous) * 100
-        : 0;
-
-      const spreadPct = slow > 0
-        ? Math.abs((fast - slow) / slow) * 100
-        : 0;
-
-      const trendPoints = Math.min(35, spreadPct * 12);
-      const slopePoints = Math.min(25, Math.abs(slopePct) * 5);
-      const rsiPoints = Math.max(0, 25 - Math.abs(strength - 50));
-      const dataPoints = Math.min(
-        15,
-        Math.floor(values.length / 20) * 3
-      );
-
-      score = Math.max(0, Math.min(
-        100,
-        Math.round(
-          trendPoints + slopePoints + rsiPoints + dataPoints
-        )
-      ));
-
-      if (fast > slow &&
-          slopePct > 0 &&
-          strength >= 52 &&
-          strength < 70) {
-
+    if (fast !== null && slow !== null) {
+      if (fast > slow && strength < 75) {
         signal = "BUY";
-        message =
-          "روند و مومنتوم متمایل به صعود هستند؛ سیگنال صرفاً آزمایشی است.";
-
-      } else if (fast < slow &&
-                 slopePct < 0 &&
-                 strength <= 48 &&
-                 strength > 30) {
-
+      } else if (fast < slow && strength > 25) {
         signal = "SELL";
-        message =
-          "روند و مومنتوم متمایل به نزول هستند؛ سیگنال صرفاً آزمایشی است.";
-
-      } else {
-        message =
-          "شاخص‌ها هم‌جهت نیستند یا بازار در محدوده خنثی قرار دارد؛ فعلاً صبر.";
       }
     }
 
+    const confidence =
+      fast === null || slow === null
+        ? 0
+        : Math.min(
+            95,
+            Math.round(
+              50 +
+              Math.abs(
+                (fast - slow) / (slow || 1)
+              ) * 10000
+            )
+          );
+
     const result = {
       signal,
-      confidence: score,
-      score,
-      message,
+      confidence,
+      message:
+        signal === "BUY"
+          ? "تمایل صعودی؛ فقط در حالت آزمایشی"
+          : signal === "SELL"
+            ? "تمایل نزولی؛ فقط در حالت آزمایشی"
+            : "فعلاً سیگنال قطعی وجود ندارد",
       emaFast: fast,
       emaSlow: slow,
-      rsi: strength,
-      sampleCount: values.length
+      rsi: strength
     };
 
     state.lastAnalysis = result;
@@ -204,14 +177,29 @@
     return result;
   }
 
-  function markToMarket(price) {
-    const t = state.openTrade;
-    if (!t) return 0;
+  // Raw PnL in the symbol's quote currency.
+  function markToMarketQuote(price) {
+    if (!state.openTrade) return 0;
 
+    const t = state.openTrade;
     const direction = t.side === "BUY" ? 1 : -1;
 
-    return (price - t.entryPrice) *
-      t.qty * direction;
+    return (
+      (price - t.entryPrice) *
+      t.qty *
+      direction
+    );
+  }
+
+  // PnL converted to USD for account balance/equity.
+  function markToMarketUsd(price, factor) {
+    if (!state.openTrade) return 0;
+
+    const t = state.openTrade;
+    const rawPnl = markToMarketQuote(price);
+
+    return rawPnl *
+      quoteToUsdFactor(t.symbol, price, factor);
   }
 
   function openTrade(side, price, symbol, options) {
@@ -220,32 +208,27 @@
     }
 
     side = String(side || "").toUpperCase();
-    price = num(price, NaN);
-    options = options || {};
 
     if (side !== "BUY" && side !== "SELL") {
       throw new Error("جهت معامله نامعتبر است.");
     }
 
+    price = num(price, NaN);
+
     if (!(price > 0)) {
       throw new Error("قیمت ورود معتبر نیست.");
     }
 
-    const qty = num(options.qty, NaN);
-    const sl = num(options.sl, NaN);
-    const tp = num(options.tp, NaN);
+    options = options || {};
+
+    const qty = num(options.qty, 1);
 
     if (!(qty > 0)) {
-      throw new Error("حجم معامله معتبر نیست.");
+      throw new Error("حجم باید بیشتر از صفر باشد.");
     }
 
-    if (!(sl >= 0.1 && sl <= 20)) {
-      throw new Error("حد ضرر باید بین ۰٫۱ تا ۲۰ درصد باشد.");
-    }
-
-    if (!(tp >= 0.1 && tp <= 50)) {
-      throw new Error("حد سود باید بین ۰٫۱ تا ۵۰ درصد باشد.");
-    }
+    const slPct = Math.max(0, num(options.sl, 0));
+    const tpPct = Math.max(0, num(options.tp, 0));
 
     const direction = side === "BUY" ? 1 : -1;
 
@@ -254,20 +237,26 @@
       side,
       symbol: String(symbol || ""),
       entryPrice: price,
-      entry: price,
       qty,
-      stopLoss: price * (1 - direction * sl / 100),
-      takeProfit: price * (1 + direction * tp / 100),
+
+      stopLoss: slPct
+        ? price * (1 - direction * slPct / 100)
+        : null,
+
+      takeProfit: tpPct
+        ? price * (1 + direction * tpPct / 100)
+        : null,
+
+      quoteCurrency: quoteCurrency(symbol),
       openedAt: new Date().toISOString()
     };
 
-    state.equity = state.balance;
     save();
 
     return state.openTrade;
   }
 
-  function closeTrade(price, reason) {
+  function closeTrade(price, reason, suppliedFactor) {
     if (!state.openTrade) return null;
 
     price = num(price, NaN);
@@ -277,73 +266,120 @@
     }
 
     const t = state.openTrade;
-    const pnl = markToMarket(price);
+
+    // Keep raw quote PnL for compatibility with the current UI.
+    const pnlQuote = markToMarketQuote(price);
+
+    // Convert the account result to USD.
+    const conversion = quoteToUsdFactor(
+      t.symbol,
+      price,
+      suppliedFactor
+    );
+
+    const pnlUsd = pnlQuote * conversion;
 
     const closed = Object.assign({}, t, {
-      entry: t.entryPrice,
-      exit: price,
       exitPrice: price,
-      pnl,
+
+      // pnl remains in quote currency for existing history display.
+      pnl: pnlQuote,
+      pnlQuote: pnlQuote,
+
+      quoteCurrency:
+        t.quoteCurrency || quoteCurrency(t.symbol),
+
+      quoteToUsdFactor: conversion,
+      pnlUsd: pnlUsd,
+
       closeReason: reason || "MANUAL",
       closedAt: new Date().toISOString()
     });
 
-    state.balance += pnl;
+    // Account balance is always USD.
+    state.balance += pnlUsd;
     state.equity = state.balance;
 
     state.trades.unshift(closed);
     state.trades = state.trades.slice(0, 200);
+
     state.openTrade = null;
 
     save();
+
     return closed;
   }
 
-  function checkPrice(price, symbol) {
-    const t = state.openTrade;
-    if (!t) return null;
+  function checkPrice(price, symbol, suppliedFactor) {
+    if (!state.openTrade) return null;
 
-    if (symbol && t.symbol !== String(symbol)) {
+    const t = state.openTrade;
+
+    if (
+      symbol &&
+      t.symbol &&
+      String(symbol) !== t.symbol
+    ) {
       return null;
     }
 
     price = num(price, NaN);
+
     if (!(price > 0)) return null;
 
-    const hitSL = t.stopLoss !== null &&
-      (t.side === "BUY"
-        ? price <= t.stopLoss
-        : price >= t.stopLoss);
+    const hitSL =
+      t.stopLoss !== null &&
+      (
+        t.side === "BUY"
+          ? price <= t.stopLoss
+          : price >= t.stopLoss
+      );
 
-    const hitTP = t.takeProfit !== null &&
-      (t.side === "BUY"
-        ? price >= t.takeProfit
-        : price <= t.takeProfit);
+    const hitTP =
+      t.takeProfit !== null &&
+      (
+        t.side === "BUY"
+          ? price >= t.takeProfit
+          : price <= t.takeProfit
+      );
 
-    if (hitSL) return closeTrade(price, "STOP_LOSS");
-    if (hitTP) return closeTrade(price, "TAKE_PROFIT");
+    if (hitSL) {
+      return closeTrade(
+        price,
+        "STOP_LOSS",
+        suppliedFactor
+      );
+    }
 
+    if (hitTP) {
+      return closeTrade(
+        price,
+        "TAKE_PROFIT",
+        suppliedFactor
+      );
+    }
+
+    // Open-position equity is also converted to USD.
     state.equity =
-      state.balance + markToMarket(price);
+      state.balance +
+      markToMarketUsd(price, suppliedFactor);
 
     save();
+
     return null;
   }
 
   function getStatus() {
-    const position = state.openTrade
-      ? Object.assign({}, state.openTrade, {
-          entry: state.openTrade.entryPrice
-        })
-      : null;
-
     return {
-      mode: "PAPER_ONLY",
+      mode: state.mode,
       realTradingEnabled: false,
+
       balance: state.balance,
       equity: state.equity,
-      position,
-      openTrade: position,
+
+      openTrade: state.openTrade,
+      position: state.openTrade,
+
       trades: state.trades.slice(),
       lastAnalysis: state.lastAnalysis,
       running: state.running
@@ -359,20 +395,25 @@
     state.running = false;
 
     save();
+
     return getStatus();
   }
 
   load();
 
+  // Keep real trading permanently disabled.
+  state.mode = "PAPER_ONLY";
+  state.realTradingEnabled = false;
+
   window.HamrahTraderAgent = {
     mode: "PAPER_ONLY",
     realTradingEnabled: false,
+
     analyze,
     openTrade,
     closeTrade,
     checkPrice,
     getStatus,
-    reset,
 
     start: function () {
       state.running = true;
@@ -384,7 +425,11 @@
       state.running = false;
       save();
       return getStatus();
-    }
-  };
-})();
+    },
 
+    reset
+  };
+
+  save();
+
+})();
