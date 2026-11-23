@@ -35,15 +35,50 @@ body{padding:5px!important}
 @media(max-width:360px){.app{grid-template-rows:28px 64px minmax(98px,1.1fr) minmax(78px,.8fr) minmax(112px,1.05fr) minmax(85px,.8fr) 40px}.signalcard{grid-template-columns:27px minmax(0,1fr) 82px}.botemoji{font-size:23px}.marketgrid{grid-template-columns:minmax(0,1.3fr) minmax(92px,.7fr)}.price{font-size:16px}.actions button{font-size:7px}}
 
 </style>
+
+<style>
+/* GALAXY TERMINAL — responsive one-screen home + independent detail views */
+html,body{height:100%;min-height:100%;overflow:hidden!important;overscroll-behavior:none}
+body{padding:0!important;background:radial-gradient(ellipse at 50% -12%,#174c9b 0,transparent 43%),radial-gradient(ellipse at 100% 100%,#28105b 0,transparent 38%),#020817}
+.app{height:100dvh;max-height:100dvh;min-height:0;width:100%;max-width:760px;margin:0 auto;overflow:hidden;display:block;padding:10px 12px 12px;position:relative}
+.view{display:none!important;height:100%;min-height:0;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;padding-bottom:12px;scrollbar-width:thin;scrollbar-color:#1b65a8 transparent}
+.view.active{display:block!important}.home-view{overflow:hidden!important;display:none!important}.home-view.active{display:flex!important;flex-direction:column;gap:10px}
+.top{flex:none;margin:0!important;min-height:42px}.brand{font-size:clamp(20px,5vw,28px)}.sub{font-size:10px}.toolmark{width:34px;height:34px}.live{font-size:10px;padding:7px 10px}
+.balance{flex:none;margin:0!important;padding:10px 12px!important;border-radius:17px!important;gap:6px}.amount{font-size:clamp(20px,5vw,30px)}.amount.rial{font-size:clamp(15px,4vw,21px)}.balance .label{font-size:9px}.balance .muted{font-size:8px;line-height:1.35}.balancebar{font-size:9px;padding:5px 7px}
+.home-menu{flex:1;min-height:0;display:flex;flex-direction:column;gap:8px}.home-caption{display:flex;justify-content:space-between;align-items:center;color:#d9ecff;font-size:12px;font-weight:900;padding:2px 3px}.home-caption small{color:#5ddfff;font-size:8px;letter-spacing:2px}.home-grid{flex:1;min-height:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(3,minmax(0,1fr));gap:9px}
+.home-tile{position:relative;min-height:0;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;text-align:right;padding:10px 13px;border:1px solid #2362a3;border-radius:17px;background:linear-gradient(145deg,#0d2a58,#07152e 75%);box-shadow:0 7px 20px #0005,inset 0 0 18px #39c9ff0c;overflow:hidden}.home-tile:after{content:"";position:absolute;width:95px;height:95px;border-radius:50%;left:-34px;bottom:-48px;background:#19c9ff12;filter:blur(3px)}.tile-icon{font-size:clamp(23px,6vw,34px);line-height:1.2;margin-bottom:5px;filter:drop-shadow(0 0 9px #42caff66)}.home-tile b{font-size:clamp(11px,3vw,14px);color:#f5f9ff}.home-tile small{font-size:clamp(8px,2.3vw,10px);color:#a9c5e8;margin-top:4px}.tile-market{border-color:#167cc3;background:linear-gradient(145deg,#06466c,#07172f)}.tile-analysis{border-color:#7541c6;background:linear-gradient(145deg,#35116a,#0a1739)}.tile-trade{border-color:#078f78;background:linear-gradient(145deg,#07564b,#071b31)}.tile-chart{border-color:#2766ce;background:linear-gradient(145deg,#123f8b,#071632)}.tile-history{border-color:#b27b21;background:linear-gradient(145deg,#68410c,#171b35)}.tile-account{border-color:#168fa5;background:linear-gradient(145deg,#07576a,#071b35)}
+.home-foot{display:flex;justify-content:space-between;align-items:center;gap:8px;color:#7fa9d6;font-size:8px;padding:1px 4px}.home-foot span:first-child{color:#8df7c8}.home-foot i{display:inline-block;width:6px;height:6px;border-radius:50%;background:#00ee9a;box-shadow:0 0 8px #00ee9a;margin-left:4px}
+.view-head{position:sticky;top:-1px;z-index:5;display:flex;align-items:center;gap:12px;padding:8px 2px 12px;margin-bottom:5px;background:linear-gradient(180deg,#030d22 80%,#030d2200)}.view-head>div{display:flex;flex-direction:column;gap:3px}.view-head b{font-size:16px}.view-head small{font-size:9px;color:#a9c1e5}.back-home{flex:none;background:linear-gradient(130deg,#087cff,#16418b);border:1px solid #4d9fff;border-radius:12px;padding:9px 13px;font-size:11px}
+.inner-view>.card{margin:8px 0!important;padding:13px!important;border-radius:17px!important}.inner-view .sectiontitle{font-size:13px}.inner-view .label{font-size:10px}.inner-view .muted{font-size:10px;line-height:1.7}.inner-view .price{font-size:clamp(25px,7vw,38px)}.inner-view select,.inner-view input{font-size:12px;padding:10px;min-height:38px}.inner-view .metric{padding:9px}.inner-view .metric span{font-size:9px}.inner-view .metric b{font-size:12px}.inner-view .signalcard{grid-template-columns:55px minmax(0,1fr) 100px}.inner-view .botemoji{font-size:42px}.inner-view .signalbadge{font-size:10px}.inner-view .signal strong{font-size:20px}.inner-view .score strong{font-size:22px}.inner-view .tradegrid label{font-size:10px}.inner-view .tradegrid input{font-size:13px}.inner-view .actions button{min-height:42px;font-size:11px}.inner-view .notice{font-size:9px}.inner-view canvas{height:220px!important}.inner-view #historyCard{display:block!important}.inner-view #historyCard .tablewrap{max-width:100%}.inner-view table{min-width:650px}.account-info p{font-size:11px;color:#b5cbea;line-height:1.9}.account-info .primary{width:100%;margin-top:8px}
+.footer{display:none!important}
+@media(max-height:700px){.app{padding:7px 9px}.home-view.active{gap:7px}.top{min-height:34px}.brand{font-size:19px}.sub{display:none}.toolmark{width:29px;height:29px}.balance{padding:7px 9px!important}.amount{font-size:20px;margin:2px 0}.amount.rial{font-size:15px}.balance .muted{font-size:7px}.balancebar{padding:3px;font-size:8px}.home-grid{gap:6px}.home-tile{padding:7px 10px;border-radius:13px}.tile-icon{font-size:24px;margin-bottom:2px}.home-tile b{font-size:10px}.home-tile small{font-size:8px}.home-foot{font-size:7px}}
+@media(max-width:360px){.app{padding:7px}.home-grid{gap:6px}.home-tile{padding:8px}.home-tile b{font-size:10px}.home-tile small{font-size:7px}.balance{gap:4px}.balancebar{font-size:7px}.toptools{gap:4px}.live{padding:6px 7px}}
+</style>
+
 </head>
 <body>
 <main class="app">
+<div class="home-view view active" id="view-home">
 <header class="top"><div><div class="brand"><span class="brandicon">📈</span> همراه تریدر</div><div class="sub">پایش بازار، تحلیل هوشمند و معامله آزمایشی</div></div><div class="toptools"><span class="toolmark">⚙️</span><span class="toolmark">🔔</span><span class="live"><i></i> آنلاین</span></div></header>
 <section class="card balance">
  <div class="balcol"><div class="label">موجودی آزمایشی</div><div class="amount" id="balance">$10,000.00</div><div class="label">حساب دمو · USD</div><div class="muted" id="equityLabel">ارزش حساب با سود/زیان باز: $10,000.00</div></div>
  <div class="balcol"><div class="label">موجودی معادل تومان</div><div class="amount rial" id="balanceIrr">—</div><div class="label">معادل تقریبی ریال و تومان</div><div class="muted" id="equityIrr">ارزش کل حساب: —</div><div class="muted" id="equityRial">— ریال</div><div class="muted" id="balanceRial">— ریال</div></div>
  <div class="balancebar"><span>🇮🇷 <b id="balanceRialMirror">در انتظار نرخ تبدیل</b></span><span>تومان <b id="balanceTomanMirror">—</b></span></div>
 </section>
+<section class="home-menu">
+ <div class="home-caption"><span>✦ مرکز فرماندهی بازار</span><small>GALAXY TERMINAL</small></div>
+ <div class="home-grid">
+  <button class="home-tile tile-market" onclick="openView('market')"><span class="tile-icon">🌐</span><b>بازارهای جهانی</b><small>قیمت لحظه‌ای و نمادها</small></button>
+  <button class="home-tile tile-analysis" onclick="openView('analysis')"><span class="tile-icon">🤖</span><b>تحلیل هوشمند</b><small>سیگنال و شاخص‌ها</small></button>
+  <button class="home-tile tile-trade" onclick="openView('trade')"><span class="tile-icon">⚡</span><b>معامله آزمایشی</b><small>خرید، فروش و مدیریت ریسک</small></button>
+  <button class="home-tile tile-chart" onclick="openView('chart')"><span class="tile-icon">📈</span><b>نمودار بازار</b><small>تاریخچه تا ۳۶۵ روز</small></button>
+  <button class="home-tile tile-history" onclick="showHistory()"><span class="tile-icon">📋</span><b>تاریخچه معاملات</b><small>گزارش سود و زیان</small></button>
+  <button class="home-tile tile-account" onclick="openView('account')"><span class="tile-icon">💱</span><b>حساب و تبدیل ارز</b><small>موجودی ریالی و نرخ دلار</small></button>
+ </div>
+ <div class="home-foot"><span><i></i> سامانه پایش فعال</span><span>DEMO MODE · REAL TRADING OFF</span></div>
+</section>
+</div>
+<section class="inner-view view" id="view-market"><div class="view-head"><button class="back-home" onclick="openView('home')">⌂ خانه</button><div><b>🌐 بازارهای جهانی</b><small>قیمت لحظه‌ای و انتخاب نماد</small></div></div>
 <section class="card">
  <div class="sectiontitle"><span>💹 بازار و قیمت لحظه‌ای</span><span class="muted">بازار جهانی</span></div>
  <div class="marketgrid"><div class="marketleft"><div class="row"><select id="symbol">
@@ -51,10 +86,14 @@ body{padding:5px!important}
  <optgroup label="فارکس و طلا"><option value="EURUSD">EUR / USD</option><option value="GBPUSD">GBP / USD</option><option value="USDJPY">USD / JPY</option><option value="XAUUSD">XAU / USD</option></optgroup></select><button class="primary" id="refresh">⟳ بروزرسانی</button></div><div class="price" id="price">— ریال</div><div class="muted" id="priceRaw">قیمت مرجع بازار: —</div><div class="muted" id="priceMeta">در انتظار دریافت قیمت…</div></div>
  <div class="marketright"><div class="label">تغییر ۲۴ ساعته</div><strong id="change">—</strong><div class="metrics" style="grid-template-columns:1fr 1fr"><div class="metric"><span>بالاترین</span><b id="high">—</b></div><div class="metric"><span>پایین‌ترین</span><b id="low">—</b></div></div><div class="status" id="status">در انتظار دریافت قیمت معتبر…</div></div></div>
 </section>
+</section>
+<section class="inner-view view" id="view-analysis"><div class="view-head"><button class="back-home" onclick="openView('home')">⌂ خانه</button><div><b>🤖 تحلیل هوشمند</b><small>سیگنال، امتیاز و شاخص‌های تکنیکال</small></div></div>
 <section class="card signalcard">
  <div class="botemoji">🤖</div><div class="signalcenter"><div class="signalbadge">🤖 تحلیل عامل هوشمند</div><div class="label">سیگنال فعلی</div><div class="signal"><strong id="signal" class="wait">WAIT · صبر</strong></div><div class="muted" id="reason">برای تحلیل، داده قیمت بیشتری جمع‌آوری می‌شود.</div></div>
  <div class="score"><div class="label">امتیاز تحلیل</div><strong id="confidence">—</strong><div class="muted">از ۱۰۰</div><div class="indicators"><div>EMA 9<b id="ema9">—</b></div><div>EMA 21<b id="ema21">—</b></div><div>RSI 14<b id="rsi">—</b></div></div></div>
 </section>
+</section>
+<section class="inner-view view" id="view-trade"><div class="view-head"><button class="back-home" onclick="openView('home')">⌂ خانه</button><div><b>⚡ معاملات آزمایشی</b><small>مدیریت حجم، حد ضرر و حد سود</small></div></div>
 <section class="card">
  <div class="tradehead"><div class="sectiontitle">📊 معامله آزمایشی</div><div class="label">فقط حساب دمو</div></div>
  <div class="fxline"><span class="label">💱 نرخ خودکار دلار آزاد · تومان</span><strong id="fxDisplay">در حال دریافت…</strong></div>
@@ -63,9 +102,16 @@ body{padding:5px!important}
  <div class="actions"><button class="buybtn" id="buy">↗ خرید آزمایشی</button><button class="sellbtn" id="sell">↙ فروش آزمایشی</button><button class="closebtn" id="closePosition">✕ بستن معامله</button></div>
  <div class="muted" id="position">موقعیت بازی وجود ندارد.</div><div class="notice">⚠️ این بخش فقط شبیه‌سازی است. سفارش واقعی و اتصال به بروکر غیرفعال است؛ سود و زیان و تبدیل ارزها تقریبی است.</div>
 </section>
+</section>
+<section class="inner-view view" id="view-chart"><div class="view-head"><button class="back-home" onclick="openView('home')">⌂ خانه</button><div><b>📈 نمودار بازار</b><small>تاریخچه و بررسی روند قیمت</small></div></div>
 <section class="card" id="chartSection"><div class="charthead"><div class="sectiontitle">📊 نمودار تغییرات قیمت</div><span class="label">تحلیل روند بازار</span></div><div class="charttools"><select id="chartInterval"><option value="1d" selected>روزانه · تا ۳۶۵ روز</option><option value="4h">۴ ساعته</option><option value="1h">۱ ساعته</option></select><button class="primary" id="refreshChart">⬇ دریافت تاریخچه</button></div><canvas id="chart" width="700" height="240"></canvas><div class="muted" id="chartNote">تاریخچه از منابع عمومی بازار دریافت می‌شود.</div></section>
-<section class="shortcuts"><button class="shortcut" onclick="showHistory()"><span>📋</span>تاریخچه</button><button class="shortcut" onclick="document.getElementById('fxDisplay').scrollIntoView({behavior:'smooth',block:'center'})"><span>💵</span>نرخ تومان</button><button class="shortcut" onclick="document.getElementById('symbol').focus()"><span>↔️</span>نمادها</button><button class="shortcut" onclick="document.getElementById('chartSection').scrollIntoView({behavior:'smooth'})"><span>⌂</span>نمودار</button></section>
-<section class="card hidden" id="historyCard"><div class="sectiontitle">📒 تاریخچه معاملات آزمایشی</div><div id="history"></div><button class="ghost" style="width:100%;margin-top:8px" onclick="document.getElementById('historyCard').classList.add('hidden')">بستن</button></section>
+</section>
+<section class="inner-view view" id="view-history"><div class="view-head"><button class="back-home" onclick="openView('home')">⌂ خانه</button><div><b>📋 تاریخچه معاملات</b><small>سوابق معاملات آزمایشی</small></div></div>
+<section class="card" id="historyCard"><div class="sectiontitle">📒 تاریخچه معاملات آزمایشی</div><div id="history"></div><button class="ghost" style="width:100%;margin-top:8px" onclick="document.getElementById('historyCard').classList.add('hidden')">بستن</button></section>
+</section>
+<section class="inner-view view" id="view-account"><div class="view-head"><button class="back-home" onclick="openView('home')">⌂ خانه</button><div><b>💱 حساب و تبدیل ارز</b><small>ارزش حساب، تومان و ریال</small></div></div>
+ <section class="card account-info"><div class="sectiontitle">💰 خلاصه حساب آزمایشی</div><p>موجودی و ارزش کل حساب در صفحه خانه به‌صورت زنده نمایش داده می‌شود.</p><div class="fxline"><span class="label">نرخ خودکار دلار آزاد · تومان</span><strong id="fxDisplayMirror">در حال دریافت…</strong></div><p class="muted">نرخ تبدیل از منبع بازار ایران دریافت می‌شود. مبالغ ریالی و تومانی تقریبی هستند.</p><button class="primary" onclick="openView('trade')">رفتن به بخش معامله آزمایشی</button></section>
+</section>
 <footer class="footer">📈 همراه تریدر · نسخه آزمایشی · معاملات واقعی غیرفعال هستند.</footer>
 </main>
 <script src="./agent.js"></script>
@@ -164,7 +210,7 @@ function renderHistory(){
  trades.map(t=>{const pnl=Number(t.pnl),exit=Number(t.exitPrice??t.exit),factor=quoteToRialFactor(String(t.symbol||""),exit,"USD"),rial=factor!==null?pnl*factor:null,tom=rial!==null?rial/10:null,when=t.closedAt?new Date(t.closedAt).toLocaleString("fa-IR"):"—",entryIrr=priceInRial(String(t.symbol||""),Number(t.entryPrice??t.entry)),exitIrr=priceInRial(String(t.symbol||""),exit);
  return "<tr><td>"+when+"</td><td>"+String(t.symbol||"—")+"</td><td>"+String(t.side||"—")+"</td><td>"+fmt(t.qty)+"</td><td>"+formatRial(entryIrr)+"</td><td>"+formatRial(exitIrr)+"</td><td style='color:"+(pnl>=0?"#35d49a":"#ff647c")+"'>"+fmt(pnl)+"</td><td>"+(tom===null?"—":fmt(tom))+"</td><td>"+(rial===null?"—":fmt(rial))+"</td></tr>"}).join("")+"</tbody></table></div>"
 }
-function showHistory(){$("historyCard").classList.remove("hidden");renderHistory()}
+function showHistory(){openView("history");renderHistory()}
 const IDS={BTCUSDT:"bitcoin",ETHUSDT:"ethereum",BNBUSDT:"binancecoin",SOLUSDT:"solana",XRPUSDT:"ripple",ADAUSDT:"cardano",DOGEUSDT:"dogecoin",LINKUSDT:"chainlink",AVAXUSDT:"avalanche-2",TONUSDT:"the-open-network",TRXUSDT:"tron",SUIUSDT:"sui",ONDOUSDT:"ondo",HYPEUSDT:"hyperliquid"};
 function unwrapRows(payload){
  if(Array.isArray(payload))return payload;if(payload&&Array.isArray(payload.results))return payload.results;if(payload&&Array.isArray(payload.data))return payload.data;if(payload&&payload.data&&Array.isArray(payload.data.results))return payload.data.results;if(payload&&typeof payload==="object")return Object.values(payload).filter(x=>x&&typeof x==="object");return []
@@ -287,5 +333,21 @@ if("serviceWorker"in navigator)window.addEventListener("load",()=>navigator.serv
 </script>
 <script>
 (function(){const fx=document.getElementById('fx'),fxDisplay=document.getElementById('fxDisplay');const sync=()=>{if(fx&&fxDisplay)fxDisplay.textContent=fx.value||'در حال دریافت…'};sync();setInterval(sync,1500);const bal=document.getElementById('balanceRial'),tom=document.getElementById('balanceIrr'),rm=document.getElementById('balanceRialMirror'),tm=document.getElementById('balanceTomanMirror');const mirror=()=>{if(rm&&bal)rm.textContent=bal.textContent;if(tm&&tom)tm.textContent=tom.textContent};mirror();setInterval(mirror,1500)})();
+</script>
+
+<script>
+(function(){
+ window.openView=function(name){
+  const valid=['home','market','analysis','trade','chart','history','account'];
+  if(!valid.includes(name))name='home';
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  const target=document.getElementById('view-'+name);if(target)target.classList.add('active');
+  if(name==='history'&&typeof renderHistory==='function')renderHistory();
+  if(name==='account'){const fx=document.getElementById('fx'),out=document.getElementById('fxDisplayMirror');if(fx&&out)out.textContent=fx.value||'در حال دریافت…';}
+  if(name==='chart'&&typeof drawChart==='function')setTimeout(()=>drawChart(),60);
+ };
+ const oldSync=()=>{const fx=document.getElementById('fx'),out=document.getElementById('fxDisplayMirror');if(fx&&out)out.textContent=fx.value||'در حال دریافت…'};
+ oldSync();setInterval(oldSync,1500);
+})();
 </script>
 </body></html>
