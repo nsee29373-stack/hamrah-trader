@@ -1,11 +1,11 @@
 
-/* Hamrah Trader - Fixed Paper Trading Engine
-   Paper trading only. Real trading is disabled.
+/* Hamrah Trader - Advanced Paper Trading Engine
+   Real trading permanently disabled in this version.
 */
 (function () {
   "use strict";
 
-  const STORAGE_KEY = "hamrah_trader_agent_v1";
+  const KEY = "hamrah_trader_agent_v1";
 
   const state = {
     mode: "PAPER_ONLY",
@@ -18,31 +18,52 @@
     running: false
   };
 
-  function num(v, fallback) {
+  const num = (v, fallback) => {
     const n = Number(v);
     return Number.isFinite(n) ? n : fallback;
-  }
+  };
 
   function save() {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      localStorage.setItem(KEY, JSON.stringify(state));
     } catch (_) {}
   }
 
   function load() {
     try {
-      const raw = localStorage.getItem(STORAGE_KEY);
+      const raw = localStorage.getItem(KEY);
       if (!raw) return;
 
       const p = JSON.parse(raw);
       if (!p || typeof p !== "object") return;
 
       state.balance = Math.max(0, num(p.balance, 10000));
-      state.equity = num(p.equity, state.balance);
-      state.trades = Array.isArray(p.trades) ? p.trades.slice(0, 200) : [];
-      state.openTrade = p.openTrade || null;
+      state.trades = Array.isArray(p.trades)
+        ? p.trades.filter(t =>
+            t && typeof t === "object" &&
+            Number.isFinite(Number(t.pnl))
+          ).slice(0, 200)
+        : [];
+
+      state.openTrade = p.openTrade &&
+        typeof p.openTrade === "object"
+        ? Object.assign({}, p.openTrade, {
+            entryPrice: num(
+              p.openTrade.entryPrice,
+              num(p.openTrade.entry, NaN)
+            )
+          })
+        : null;
+
+      if (state.openTrade &&
+          !(state.openTrade.entryPrice > 0)) {
+        state.openTrade = null;
+      }
+
+      state.equity = state.balance;
       state.lastAnalysis = p.lastAnalysis || null;
       state.running = false;
+
     } catch (_) {}
   }
 
@@ -65,56 +86,116 @@
     let gains = 0;
     let losses = 0;
 
-    for (let i = values.length - period; i < values.length; i++) {
+    for (let i = 1; i <= period; i++) {
       const change = values[i] - values[i - 1];
-
       if (change > 0) gains += change;
       else losses -= change;
     }
 
-    if (losses === 0) return gains === 0 ? 50 : 100;
+    let avgGain = gains / period;
+    let avgLoss = losses / period;
 
-    const rs = gains / losses;
+    for (let i = period + 1; i < values.length; i++) {
+      const change = values[i] - values[i - 1];
+
+      avgGain =
+        (avgGain * (period - 1) + Math.max(change, 0)) / period;
+
+      avgLoss =
+        (avgLoss * (period - 1) + Math.max(-change, 0)) / period;
+    }
+
+    if (avgLoss === 0) {
+      return avgGain === 0 ? 50 : 100;
+    }
+
+    const rs = avgGain / avgLoss;
     return 100 - (100 / (1 + rs));
   }
 
   function analyze(input) {
-    const values = Array.isArray(input)
-      ? input.map(Number).filter(v => Number.isFinite(v) && v > 0)
-      : (input && Array.isArray(input.closes)
-          ? input.closes.map(Number).filter(v => Number.isFinite(v) && v > 0)
-          : []);
+    const raw = Array.isArray(input)
+      ? input
+      : input && Array.isArray(input.closes)
+        ? input.closes
+        : [];
 
-    const fast = ema(values.slice(-60), 9);
-    const slow = ema(values.slice(-100), 21);
-    const strength = rsi(values, 14);
+    const values = raw
+      .map(Number)
+      .filter(v => Number.isFinite(v) && v > 0);
+
+    const enoughData = values.length >= 30;
+
+    const fast = enoughData ? ema(values, 9) : null;
+    const slow = enoughData ? ema(values, 21) : null;
+    const strength = enoughData ? rsi(values, 14) : null;
 
     let signal = "HOLD";
-    let confidence = 0;
-    let message = "برای تحلیل مطمئن، داده بیشتری لازم است.";
+    let score = 0;
+    let message = "برای تحلیل، حداقل ۳۰ داده معتبر لازم است.";
 
-    if (fast !== null && slow !== null && strength !== null) {
-      if (fast > slow && strength >= 50 && strength < 75) {
+    if (enoughData && fast !== null &&
+        slow !== null && strength !== null) {
+
+      const last = values[values.length - 1];
+      const previous = values[values.length - 6];
+
+      const slopePct = previous > 0
+        ? ((last - previous) / previous) * 100
+        : 0;
+
+      const spreadPct = slow > 0
+        ? Math.abs((fast - slow) / slow) * 100
+        : 0;
+
+      const trendPoints = Math.min(35, spreadPct * 12);
+      const slopePoints = Math.min(25, Math.abs(slopePct) * 5);
+      const rsiPoints = Math.max(0, 25 - Math.abs(strength - 50));
+      const dataPoints = Math.min(
+        15,
+        Math.floor(values.length / 20) * 3
+      );
+
+      score = Math.max(0, Math.min(
+        100,
+        Math.round(
+          trendPoints + slopePoints + rsiPoints + dataPoints
+        )
+      ));
+
+      if (fast > slow &&
+          slopePct > 0 &&
+          strength >= 52 &&
+          strength < 70) {
+
         signal = "BUY";
-        message = "تمایل صعودی؛ فقط در حالت آزمایشی.";
-      } else if (fast < slow && strength > 25 && strength <= 50) {
-        signal = "SELL";
-        message = "تمایل نزولی؛ فقط در حالت آزمایشی.";
-      } else {
-        message = "فعلاً شرایط سیگنال مناسب نیست.";
-      }
+        message =
+          "روند و مومنتوم متمایل به صعود هستند؛ سیگنال صرفاً آزمایشی است.";
 
-      const difference = Math.abs((fast - slow) / slow);
-      confidence = Math.min(95, Math.round(50 + difference * 10000));
+      } else if (fast < slow &&
+                 slopePct < 0 &&
+                 strength <= 48 &&
+                 strength > 30) {
+
+        signal = "SELL";
+        message =
+          "روند و مومنتوم متمایل به نزول هستند؛ سیگنال صرفاً آزمایشی است.";
+
+      } else {
+        message =
+          "شاخص‌ها هم‌جهت نیستند یا بازار در محدوده خنثی قرار دارد؛ فعلاً صبر.";
+      }
     }
 
     const result = {
       signal,
-      confidence,
+      confidence: score,
+      score,
       message,
       emaFast: fast,
       emaSlow: slow,
-      rsi: strength
+      rsi: strength,
+      sampleCount: values.length
     };
 
     state.lastAnalysis = result;
@@ -128,7 +209,9 @@
     if (!t) return 0;
 
     const direction = t.side === "BUY" ? 1 : -1;
-    return (price - t.entryPrice) * t.qty * direction;
+
+    return (price - t.entryPrice) *
+      t.qty * direction;
   }
 
   function openTrade(side, price, symbol, options) {
@@ -144,7 +227,7 @@
       throw new Error("جهت معامله نامعتبر است.");
     }
 
-    if (!(Number.isFinite(price) && price > 0)) {
+    if (!(price > 0)) {
       throw new Error("قیمت ورود معتبر نیست.");
     }
 
@@ -152,7 +235,7 @@
     const sl = num(options.sl, NaN);
     const tp = num(options.tp, NaN);
 
-    if (!(qty > 0 && Number.isFinite(qty))) {
+    if (!(qty > 0)) {
       throw new Error("حجم معامله معتبر نیست.");
     }
 
@@ -189,7 +272,7 @@
 
     price = num(price, NaN);
 
-    if (!(Number.isFinite(price) && price > 0)) {
+    if (!(price > 0)) {
       throw new Error("قیمت خروج معتبر نیست.");
     }
 
@@ -210,7 +293,6 @@
 
     state.trades.unshift(closed);
     state.trades = state.trades.slice(0, 200);
-
     state.openTrade = null;
 
     save();
@@ -221,10 +303,12 @@
     const t = state.openTrade;
     if (!t) return null;
 
-    if (symbol && t.symbol !== String(symbol)) return null;
+    if (symbol && t.symbol !== String(symbol)) {
+      return null;
+    }
 
     price = num(price, NaN);
-    if (!(Number.isFinite(price) && price > 0)) return null;
+    if (!(price > 0)) return null;
 
     const hitSL = t.stopLoss !== null &&
       (t.side === "BUY"
@@ -239,9 +323,10 @@
     if (hitSL) return closeTrade(price, "STOP_LOSS");
     if (hitTP) return closeTrade(price, "TAKE_PROFIT");
 
-    state.equity = state.balance + markToMarket(price);
-    save();
+    state.equity =
+      state.balance + markToMarket(price);
 
+    save();
     return null;
   }
 
@@ -282,7 +367,6 @@
   window.HamrahTraderAgent = {
     mode: "PAPER_ONLY",
     realTradingEnabled: false,
-
     analyze,
     openTrade,
     closeTrade,
@@ -303,3 +387,4 @@
     }
   };
 })();
+
