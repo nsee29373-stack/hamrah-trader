@@ -1,25 +1,285 @@
-/* HAMRAH TRADER - PAPER TRADING AGENT
-   EMA 9/21 + RSI 14 | Simulation only | No broker orders.
+
+/* Hamrah Trader - Paper Trading Engine
+   Real trading is intentionally disabled.
 */
-(function(){
-"use strict";
-const CONFIG={fastEMA:9,slowEMA:21,rsiPeriod:14,startingBalance:10000};
-let state={running:false,balance:CONFIG.startingBalance,position:null,trades:[],signal:"WAIT"};
-function ema(values,period){if(values.length<period)return null;const k=2/(period+1);let v=values.slice(0,period).reduce((a,b)=>a+b,0)/period;for(let i=period;i<values.length;i++)v=values[i]*k+v*(1-k);return v;}
-function rsi(values,period){if(values.length<=period)return null;let gain=0,loss=0;for(let i=values.length-period;i<values.length;i++){const d=values[i]-values[i-1];if(d>0)gain+=d;else loss-=d;}if(loss===0)return gain===0?50:100;if(gain===0)return 0;const rs=gain/loss;return 100-100/(1+rs);}
-function analyze(prices){const v=(Array.isArray(prices)?prices:[]).map(Number).filter(x=>Number.isFinite(x)&&x>0);if(v.length<CONFIG.slowEMA+2){state.signal="WAIT";return {signal:"WAIT",message:"برای محاسبه EMA 9/21 حداقل ۲۳ قیمت لازم است. داده کندل‌های اخیر در حال تکمیل است.",confidence:null,emaFast:null,emaSlow:null,rsi:null,samples:v.length,required:23};}
-const fast=ema(v,9),slow=ema(v,21),r=rsi(v,14),pf=ema(v.slice(0,-1),9),ps=ema(v.slice(0,-1),21);let signal="WAIT",message="هنوز شرایط ورود کامل نیست.",confidence=35;
-const trend=Math.abs((fast-slow)/slow)*100;
-if(pf<=ps&&fast>slow&&r>=50&&r<70){signal="BUY";message="تقاطع صعودی EMA با تأیید RSI شناسایی شد.";confidence=Math.min(95,60+trend*8+(r-50)*0.6);}
-else if(pf>=ps&&fast<slow&&r<=50&&r>30){signal="SELL";message="تقاطع نزولی EMA با تأیید RSI شناسایی شد.";confidence=Math.min(95,60+trend*8+(50-r)*0.6);}
-else if(r>=70){message="RSI در محدوده اشباع خرید است؛ از ورود عجولانه پرهیز کنید.";confidence=55;}
-else if(r<=30){message="RSI در محدوده اشباع فروش است؛ احتمال نوسان برگشتی وجود دارد.";confidence=55;}
-state.signal=signal;return {signal,message,confidence:Math.round(confidence),price:v[v.length-1],emaFast:fast,emaSlow:slow,rsi:r,samples:v.length,required:23,mode:"PAPER_ONLY"};}
-function openTrade(side,price,symbol,options){options=options||{};price=Number(price);const qty=Number(options.qty),sl=Number(options.sl),tp=Number(options.tp);if(!state.running)throw Error("موتور معاملات آزمایشی فعال نیست.");if(state.position)throw Error("ابتدا موقعیت باز فعلی را ببندید.");if(side!=="BUY"&&side!=="SELL")throw Error("جهت معامله نامعتبر است.");if(!Number.isFinite(price)||price<=0)throw Error("قیمت ورود معتبر نیست.");if(!Number.isFinite(qty)||qty<=0)throw Error("حجم معامله معتبر نیست.");if(!Number.isFinite(sl)||sl<0.1||sl>20||!Number.isFinite(tp)||tp<0.1||tp>50)throw Error("درصد حد ضرر یا حد سود نامعتبر است.");
-const buy=side==="BUY";state.position={id:Date.now(),symbol:String(symbol||""),side,entry:price,qty,stopLoss:price*(buy?1-sl/100:1+sl/100),takeProfit:price*(buy?1+tp/100:1-tp/100),slPercent:sl,tpPercent:tp,openedAt:new Date().toISOString(),status:"OPEN",mode:"PAPER_ONLY"};return JSON.parse(JSON.stringify(state.position));}
-function closeTrade(price,reason){if(!state.position)throw Error("موقعیت بازی وجود ندارد.");price=Number(price);if(!Number.isFinite(price)||price<=0)throw Error("قیمت خروج معتبر نیست.");const p=state.position,direction=p.side==="BUY"?1:-1;const pnl=(price-p.entry)*p.qty*direction;const pct=((price-p.entry)/p.entry)*100*direction;const trade={...p,exit:price,pnl:Number(pnl.toFixed(8)),pnlPercent:Number(pct.toFixed(4)),reason:reason||"MANUAL",status:"CLOSED",closedAt:new Date().toISOString(),mode:"PAPER_ONLY"};state.balance+=trade.pnl;state.trades.unshift(trade);state.position=null;return JSON.parse(JSON.stringify(trade));}
-function checkPrice(price,symbol){const p=state.position;if(!p||String(symbol||p.symbol)!==p.symbol)return null;price=Number(price);if(!Number.isFinite(price)||price<=0)return null;const stop=p.side==="BUY"?price<=p.stopLoss:price>=p.stopLoss;const target=p.side==="BUY"?price>=p.takeProfit:price<=p.takeProfit;if(stop)return closeTrade(price,"STOP_LOSS");if(target)return closeTrade(price,"TAKE_PROFIT");return null;}
-function getStatus(){return JSON.parse(JSON.stringify({...state,config:CONFIG,mode:"PAPER_ONLY",realTradingEnabled:false}));}
-window.HamrahTraderAgent={start(){state.running=true;return getStatus();},stop(){state.running=false;return getStatus();},analyze,openTrade,closeTrade,checkPrice,getStatus,reset(){state={running:false,balance:CONFIG.startingBalance,position:null,trades:[],signal:"WAIT"};return getStatus();}};
-console.log("Hamrah Trader PAPER agent ready.");
+(function () {
+  "use strict";
+
+  const STORAGE_KEY = "hamrah_trader_agent_v1";
+
+  const state = {
+    mode: "PAPER_ONLY",
+    realTradingEnabled: false,
+    balance: 10000,
+    equity: 10000,
+    trades: [],
+    openTrade: null,
+    lastAnalysis: null,
+    running: false
+  };
+
+  function num(v, fallback) {
+    const n = Number(v);
+    return Number.isFinite(n) ? n : fallback;
+  }
+
+  function save() {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    } catch (_) {}
+  }
+
+  function load() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return;
+      const parsed = JSON.parse(raw);
+      if (parsed && typeof parsed === "object") {
+        state.balance = num(parsed.balance, 10000);
+        state.equity = num(parsed.equity, state.balance);
+        state.trades = Array.isArray(parsed.trades) ? parsed.trades : [];
+        state.openTrade = parsed.openTrade || null;
+        state.lastAnalysis = parsed.lastAnalysis || null;
+      }
+    } catch (_) {}
+  }
+
+  function ema(values, period) {
+    if (!values.length) return null;
+    const k = 2 / (period + 1);
+    let result = values[0];
+
+    for (let i = 1; i < values.length; i++) {
+      result = values[i] * k + result * (1 - k);
+    }
+    return result;
+  }
+
+  function rsi(values, period) {
+    if (values.length < period + 1) return 50;
+
+    let gains = 0;
+    let losses = 0;
+
+    for (let i = values.length - period; i < values.length; i++) {
+      const change = values[i] - values[i - 1];
+      if (change > 0) gains += change;
+      else losses -= change;
+    }
+
+    if (losses === 0) return 100;
+
+    const rs = (gains / period) / (losses / period);
+    return 100 - (100 / (1 + rs));
+  }
+
+  function analyze(input) {
+    const values = Array.isArray(input)
+      ? input.map(Number).filter(Number.isFinite)
+      : (input && Array.isArray(input.closes)
+          ? input.closes.map(Number).filter(Number.isFinite)
+          : []);
+
+    const fast = ema(values.slice(-60), 9);
+    const slow = ema(values.slice(-100), 21);
+    const strength = rsi(values, 14);
+
+    let signal = "HOLD";
+
+    if (fast !== null && slow !== null) {
+      if (fast > slow && strength < 75) signal = "BUY";
+      else if (fast < slow && strength > 25) signal = "SELL";
+    }
+
+    const confidence = fast === null || slow === null
+      ? 0
+      : Math.min(
+          95,
+          Math.round(50 + Math.abs((fast - slow) / (slow || 1)) * 10000)
+        );
+
+    const result = {
+      signal: signal,
+      confidence: confidence,
+      message: signal === "BUY"
+        ? "تمایل صعودی؛ فقط در حالت آزمایشی"
+        : signal === "SELL"
+          ? "تمایل نزولی؛ فقط در حالت آزمایشی"
+          : "فعلاً سیگنال قطعی وجود ندارد",
+      emaFast: fast,
+      emaSlow: slow,
+      rsi: strength
+    };
+
+    state.lastAnalysis = result;
+    save();
+    return result;
+  }
+
+  function markToMarket(price) {
+    if (!state.openTrade) return 0;
+
+    const t = state.openTrade;
+    const direction = t.side === "BUY" ? 1 : -1;
+
+    return (price - t.entryPrice) * t.qty * direction;
+  }
+
+  function openTrade(side, price, symbol, options) {
+    if (state.openTrade) {
+      throw new Error("ابتدا معامله باز فعلی را ببندید.");
+    }
+
+    side = String(side || "").toUpperCase();
+
+    if (side !== "BUY" && side !== "SELL") {
+      throw new Error("جهت معامله نامعتبر است.");
+    }
+
+    price = num(price, NaN);
+
+    if (!(price > 0)) {
+      throw new Error("قیمت ورود معتبر نیست.");
+    }
+
+    options = options || {};
+
+    const qty = num(options.qty, 1);
+    if (!(qty > 0)) {
+      throw new Error("حجم باید بیشتر از صفر باشد.");
+    }
+
+    const slPct = Math.max(0, num(options.sl, 0));
+    const tpPct = Math.max(0, num(options.tp, 0));
+    const direction = side === "BUY" ? 1 : -1;
+
+    state.openTrade = {
+      id: Date.now(),
+      side: side,
+      symbol: String(symbol || ""),
+      entryPrice: price,
+      qty: qty,
+      stopLoss: slPct
+        ? price * (1 - direction * slPct / 100)
+        : null,
+      takeProfit: tpPct
+        ? price * (1 + direction * tpPct / 100)
+        : null,
+      openedAt: new Date().toISOString()
+    };
+
+    save();
+    return state.openTrade;
+  }
+
+  function closeTrade(price, reason) {
+    if (!state.openTrade) return null;
+
+    price = num(price, NaN);
+
+    if (!(price > 0)) {
+      throw new Error("قیمت خروج معتبر نیست.");
+    }
+
+    const t = state.openTrade;
+    const pnl = markToMarket(price);
+
+    const closed = Object.assign({}, t, {
+      exitPrice: price,
+      pnl: pnl,
+      closeReason: reason || "MANUAL",
+      closedAt: new Date().toISOString()
+    });
+
+    state.balance += pnl;
+    state.equity = state.balance;
+    state.trades.unshift(closed);
+    state.trades = state.trades.slice(0, 200);
+    state.openTrade = null;
+
+    save();
+    return closed;
+  }
+
+  function checkPrice(price, symbol) {
+    if (!state.openTrade) return null;
+
+    const t = state.openTrade;
+
+    if (symbol && t.symbol && String(symbol) !== t.symbol) {
+      return null;
+    }
+
+    price = num(price, NaN);
+    if (!(price > 0)) return null;
+
+    const hitSL = t.stopLoss !== null &&
+      (t.side === "BUY"
+        ? price <= t.stopLoss
+        : price >= t.stopLoss);
+
+    const hitTP = t.takeProfit !== null &&
+      (t.side === "BUY"
+        ? price >= t.takeProfit
+        : price <= t.takeProfit);
+
+    if (hitSL) return closeTrade(price, "STOP_LOSS");
+    if (hitTP) return closeTrade(price, "TAKE_PROFIT");
+
+    state.equity = state.balance + markToMarket(price);
+    save();
+
+    return null;
+  }
+
+  function getStatus() {
+    return {
+      mode: state.mode,
+      realTradingEnabled: false,
+      balance: state.balance,
+      equity: state.equity,
+      openTrade: state.openTrade,
+      trades: state.trades.slice(),
+      lastAnalysis: state.lastAnalysis,
+      running: state.running
+    };
+  }
+
+  function reset() {
+    state.balance = 10000;
+    state.equity = 10000;
+    state.trades = [];
+    state.openTrade = null;
+    state.lastAnalysis = null;
+    state.running = false;
+
+    save();
+    return getStatus();
+  }
+
+  load();
+
+  window.HamrahTraderAgent = {
+    mode: "PAPER_ONLY",
+    realTradingEnabled: false,
+    analyze: analyze,
+    openTrade: openTrade,
+    closeTrade: closeTrade,
+    checkPrice: checkPrice,
+    getStatus: getStatus,
+
+    start: function () {
+      state.running = true;
+      save();
+      return getStatus();
+    },
+
+    stop: function () {
+      state.running = false;
+      save();
+      return getStatus();
+    },
+
+    reset: reset
+  };
 })();
