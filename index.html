@@ -19,19 +19,21 @@ select,input{background:#0b1425;color:var(--txt);border:1px solid #30435f;border
 .signal{display:flex;justify-content:space-between;align-items:center;gap:10px}.signal strong{font-size:19px}.buy{color:var(--green)}.sell{color:var(--red)}.wait{color:var(--gold)}
 button{border:0;border-radius:12px;padding:12px 10px;font:inherit;font-weight:700;cursor:pointer;background:var(--panel2);color:var(--txt)}button:disabled{opacity:.4}.primary{background:linear-gradient(90deg,#0c9bc0,#2376d7);color:white}.buybtn{background:#126b54;color:#fff}.sellbtn{background:#8b3045;color:#fff}.ghost{border:1px solid var(--line);background:#111d30}
 .actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:10px}.shortcuts{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.shortcut{padding:12px 5px;text-align:center;font-size:11px}.shortcut span{display:block;font-size:19px;margin-bottom:5px}
-.sectiontitle{font-size:14px;font-weight:800;margin:2px 0 12px}.hidden{display:none!important}canvas{width:100%;height:130px;display:block;background:#0b1425;border-radius:12px}
+.sectiontitle{font-size:14px;font-weight:800;margin:2px 0 12px}.hidden{display:none!important}canvas{width:100%;height:150px;display:block;background:#0b1425;border-radius:12px}
 .tradegrid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.tradegrid label{display:block;color:var(--muted);font-size:11px;margin-bottom:6px}
-table{width:100%;border-collapse:collapse;font-size:11px}td,th{padding:9px 5px;border-bottom:1px solid #243550;text-align:right}th{color:var(--muted)}
+.tablewrap{overflow-x:auto}table{width:100%;border-collapse:collapse;font-size:11px;min-width:480px}td,th{padding:9px 5px;border-bottom:1px solid #243550;text-align:right}th{color:var(--muted)}
 .notice{font-size:11px;color:#f7d58a;line-height:1.9}.status{font-size:11px;color:var(--muted);margin-top:8px;min-height:18px}
 @media(min-width:600px){body{padding:24px}.price{font-size:36px}}
 </style>
 </head>
 <body><main class="app">
 <header class="top"><div><div class="brand">📈 همراه تریدر</div><div class="sub">پایش بازار، تحلیل هوشمند و معامله آزمایشی</div></div><div class="live">● آنلاین</div></header>
+
 <section class="card balance">
  <div><div class="label">موجودی آزمایشی</div><div class="amount" id="balance">$10,000.00</div><div class="label">حساب دمو · USD</div></div>
- <div><div class="label">معادل تقریبی تومان</div><div class="amount rial" id="balanceIrr">—</div><div class="label">نرخ تبدیل دستی</div></div>
+ <div><div class="label">معادل تقریبی تومان</div><div class="amount rial" id="balanceIrr">—</div><div class="label" id="balanceRial">— ریال</div><div class="label">نرخ تبدیل دستی · تومان</div></div>
 </section>
+
 <section class="card">
  <div class="sectiontitle">بازار موردنظر</div>
  <div class="row"><select id="symbol">
@@ -40,12 +42,14 @@ table{width:100%;border-collapse:collapse;font-size:11px}td,th{padding:9px 5px;b
  <div class="price" id="price">—</div><div class="muted" id="priceMeta">در انتظار دریافت قیمت…</div>
  <div class="metrics" style="margin-top:12px"><div class="metric"><span class="label">تغییر ۲۴ساعته</span><b id="change">—</b></div><div class="metric"><span class="label">بالاترین</span><b id="high">—</b></div><div class="metric"><span class="label">پایین‌ترین</span><b id="low">—</b></div></div><div class="status" id="status"></div>
 </section>
+
 <section class="card">
  <div class="sectiontitle">🤖 تحلیل عامل هوشمند</div>
  <div class="signal"><div><div class="label">سیگنال فعلی</div><strong id="signal" class="wait">WAIT · صبر</strong></div><div style="text-align:left"><div class="label">قدرت سیگنال</div><strong id="confidence">—</strong></div></div>
  <p class="muted" id="reason">برای تحلیل، داده قیمت بیشتری جمع‌آوری می‌شود.</p>
  <div class="metrics"><div class="metric"><span class="label">EMA 9</span><b id="ema9">—</b></div><div class="metric"><span class="label">EMA 21</span><b id="ema21">—</b></div><div class="metric"><span class="label">RSI 14</span><b id="rsi">—</b></div></div>
 </section>
+
 <section class="card">
  <div class="sectiontitle">معامله آزمایشی</div>
  <div class="tradegrid">
@@ -57,12 +61,14 @@ table{width:100%;border-collapse:collapse;font-size:11px}td,th{padding:9px 5px;b
  <div class="actions"><button class="buybtn" id="buy">خرید آزمایشی</button><button class="sellbtn" id="sell">فروش آزمایشی</button></div>
  <div class="muted" id="position">موقعیت بازی وجود ندارد.</div>
  <div class="actions"><button class="ghost" id="closePosition">بستن معامله آزمایشی</button></div>
- <div class="notice">این بخش فقط شبیه‌سازی است. سفارش واقعی و اتصال به بروکر غیرفعال است. سود و زیان تقریبی است و کارمزد، اسپرد، اندازه قرارداد و تبدیل دقیق ارزهای مظنه را لحاظ نمی‌کند.</div>
+ <div class="notice">این بخش فقط شبیه‌سازی است. سفارش واقعی و اتصال به بروکر غیرفعال است. سود و زیان و تبدیل ارزها تقریبی است؛ کارمزد، اسپرد، اندازه قرارداد و تفاوت ارز مظنه نمادهای فارکس در محاسبات لحاظ نشده است.</div>
 </section>
+
 <section class="card">
- <div class="sectiontitle">نمودار تغییرات قیمت</div><canvas id="chart" width="700" height="180"></canvas>
- <div class="muted">برای رمزارزها داده کندل‌های اخیر از سرویس بازار دریافت می‌شود؛ این نسخه هنوز تاریخچه یک‌ساله کامل ندارد.</div>
+ <div class="sectiontitle">نمودار تغییرات قیمت</div><canvas id="chart" width="700" height="190"></canvas>
+ <div class="muted" id="chartNote">برای رمزارزها تاریخچه روزانه تا حدود یک سال دریافت می‌شود؛ برای فارکس و طلا فعلاً نمودار از داده‌های همین اجرا ساخته می‌شود.</div>
 </section>
+
 <section class="card">
  <div class="sectiontitle">دسترسی سریع</div><div class="shortcuts">
   <button class="shortcut" onclick="document.getElementById('chart').scrollIntoView({behavior:'smooth'})"><span>📊</span>نمودار</button>
@@ -74,38 +80,140 @@ table{width:100%;border-collapse:collapse;font-size:11px}td,th{padding:9px 5px;b
 <section class="card hidden" id="historyCard"><div class="sectiontitle">تاریخچه معاملات آزمایشی</div><div id="history"></div><button class="ghost" style="width:100%;margin-top:8px" onclick="document.getElementById('historyCard').classList.add('hidden')">بستن</button></section>
 <footer class="muted" style="text-align:center;padding:12px">همراه تریدر · نسخه آزمایشی</footer>
 </main>
+
 <script src="./agent.js"></script>
 <script>
 "use strict";
 const $=id=>document.getElementById(id);
-let currentPrice=null, prices=[], currentSymbol="", requestBusy=false;
+let currentPrice=null,prices=[],currentSymbol="",requestBusy=false,requestToken=0;
 const isCrypto=s=>s.endsWith("USDT");
 const fmt=n=>Number.isFinite(Number(n))?Number(n).toLocaleString("en-US",{maximumFractionDigits:8}):"—";
 function setStatus(t){$("status").textContent=t;}
-function updateBalance(){const st=window.HamrahTraderAgent.getStatus();$("balance").textContent="$"+fmt(st.balance);$("balanceIrr").textContent=fmt(st.balance*Number($("fx").value||0))+" تومان";}
-function drawChart(){const c=$("chart"),ctx=c.getContext("2d"),w=c.width,h=c.height;ctx.clearRect(0,0,w,h);if(prices.length<2)return;let min=Math.min(...prices),max=Math.max(...prices);if(max===min){max+=1;min-=1;}ctx.strokeStyle="#56dcff";ctx.lineWidth=3;ctx.beginPath();prices.forEach((v,i)=>{const x=i/(prices.length-1)*w,y=h-12-(v-min)/(max-min)*(h-24);i?ctx.lineTo(x,y):ctx.moveTo(x,y);});ctx.stroke();}
-function updateAgent(){const a=window.HamrahTraderAgent.analyze(prices);$("signal").textContent=a.signal==="BUY"?"BUY · خرید":a.signal==="SELL"?"SELL · فروش":"WAIT · صبر";$("signal").className=a.signal==="BUY"?"buy":a.signal==="SELL"?"sell":"wait";$("confidence").textContent=a.confidence==null?"—":a.confidence+"٪";$("reason").textContent=a.message||"داده کافی نیست."; $("ema9").textContent=fmt(a.emaFast);$("ema21").textContent=fmt(a.emaSlow);$("rsi").textContent=a.rsi==null?"—":Number(a.rsi).toFixed(1);}
-function renderPosition(){const p=window.HamrahTraderAgent.getStatus().position;if(!p){$("position").textContent="موقعیت بازی وجود ندارد.";return;}const direction=p.side==="BUY"?1:-1;const pnl=(currentPrice&&p.symbol===currentSymbol)?(currentPrice-p.entry)*p.qty*direction:0;const sl=p.stopLoss,tp=p.takeProfit;$("position").textContent=(p.side==="BUY"?"خرید ":"فروش ")+p.symbol+" | ورود: "+fmt(p.entry)+" | حجم: "+fmt(p.qty)+" | حدضرر: "+fmt(sl)+" | حدسود: "+fmt(tp)+" | سود/زیان تقریبی: "+fmt(pnl)+" USD ("+fmt(pnl*Number($("fx").value||0))+" تومان)";}
-function renderHistory(){const trades=window.HamrahTraderAgent.getStatus().trades;if(!trades.length){$("history").textContent="هنوز معامله‌ای ثبت نشده است.";return;}$("history").innerHTML="<table><thead><tr><th>نماد</th><th>جهت</th><th>ورود</th><th>خروج</th><th>سود/زیان تقریبی</th></tr></thead><tbody>"+trades.map(t=>"<tr><td>"+t.symbol+"</td><td>"+t.side+"</td><td>"+fmt(t.entry)+"</td><td>"+fmt(t.exit)+"</td><td style='color:"+(t.pnl>=0?"#35d49a":"#ff647c")+"'>"+fmt(t.pnl)+"</td></tr>").join("")+"</tbody></table>";}
+function updateBalance(){
+ const st=window.HamrahTraderAgent.getStatus(),rate=Number($("fx").value);
+ $("balance").textContent="$"+fmt(st.balance);
+ if(Number.isFinite(rate)&&rate>0){const toman=st.balance*rate;$("balanceIrr").textContent=fmt(toman)+" تومان";$("balanceRial").textContent=fmt(toman*10)+" ریال";}
+ else{$("balanceIrr").textContent="—";$("balanceRial").textContent="نرخ تبدیل معتبر نیست";}
+}
+function drawChart(){
+ const c=$("chart"),ctx=c.getContext("2d"),w=c.width,h=c.height;ctx.clearRect(0,0,w,h);
+ if(prices.length<2)return;
+ let min=Math.min(...prices),max=Math.max(...prices);if(max===min){max+=1;min-=1;}
+ ctx.strokeStyle="#56dcff";ctx.lineWidth=3;ctx.beginPath();
+ prices.forEach((v,i)=>{const x=i/(prices.length-1)*w,y=h-12-(v-min)/(max-min)*(h-24);i?ctx.lineTo(x,y):ctx.moveTo(x,y);});ctx.stroke();
+}
+function updateAgent(){
+ const a=window.HamrahTraderAgent.analyze(prices);
+ $("signal").textContent=a.signal==="BUY"?"BUY · خرید":a.signal==="SELL"?"SELL · فروش":"WAIT · صبر";
+ $("signal").className=a.signal==="BUY"?"buy":a.signal==="SELL"?"sell":"wait";
+ $("confidence").textContent=a.confidence==null?"—":a.confidence+"٪";
+ $("reason").textContent=a.message||"داده کافی نیست.";
+ $("ema9").textContent=fmt(a.emaFast);$("ema21").textContent=fmt(a.emaSlow);
+ $("rsi").textContent=a.rsi==null?"—":Number(a.rsi).toFixed(1);
+}
+function renderPosition(){
+ const p=window.HamrahTraderAgent.getStatus().position;
+ if(!p){$("position").textContent="موقعیت بازی وجود ندارد.";return;}
+ const direction=p.side==="BUY"?1:-1,hasPrice=Number.isFinite(currentPrice)&&currentPrice>0&&p.symbol===currentSymbol;
+ const pnl=hasPrice?(currentPrice-p.entry)*p.qty*direction:null,rate=Number($("fx").value);
+ const toman=Number.isFinite(pnl)&&Number.isFinite(rate)&&rate>0?pnl*rate:null;
+ const money=pnl===null?"قیمت نماد معامله را دریافت کنید":fmt(pnl)+" USD"+(toman===null?"":" | "+fmt(toman)+" تومان | "+fmt(toman*10)+" ریال");
+ $("position").textContent=(p.side==="BUY"?"خرید ":"فروش ")+p.symbol+" | ورود: "+fmt(p.entry)+" | حجم: "+fmt(p.qty)+" | حدضرر: "+fmt(p.stopLoss)+" | حدسود: "+fmt(p.takeProfit)+" | سود/زیان: "+money;
+}
+function renderHistory(){
+ const trades=window.HamrahTraderAgent.getStatus().trades;
+ if(!trades.length){$("history").textContent="هنوز معامله‌ای ثبت نشده است.";return;}
+ const rate=Number($("fx").value);
+ $("history").innerHTML="<div class='tablewrap'><table><thead><tr><th>نماد</th><th>جهت</th><th>ورود</th><th>خروج</th><th>USD</th><th>تومان</th><th>ریال</th></tr></thead><tbody>"+
+ trades.map(t=>{const toman=Number.isFinite(rate)&&rate>0?t.pnl*rate:null;return "<tr><td>"+t.symbol+"</td><td>"+t.side+"</td><td>"+fmt(t.entry)+"</td><td>"+fmt(t.exit)+"</td><td style='color:"+(t.pnl>=0?"#35d49a":"#ff647c")+"'>"+fmt(t.pnl)+"</td><td>"+(toman===null?"—":fmt(toman))+"</td><td>"+(toman===null?"—":fmt(toman*10))+"</td></tr>";}).join("")+"</tbody></table></div>";
+}
 function showHistory(){$("historyCard").classList.remove("hidden");renderHistory();}
-async function fetchJson(url){const controller=new AbortController();const timer=setTimeout(()=>controller.abort(),12000);try{const r=await fetch(url,{cache:"no-store",signal:controller.signal,headers:{"Accept":"application/json"}});if(!r.ok)throw new Error("HTTP "+r.status);return await r.json();}finally{clearTimeout(timer);}}
+async function fetchJson(url){
+ const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),10000);
+ try{const r=await fetch(url,{cache:"no-store",signal:controller.signal,headers:{"Accept":"application/json"}});
+ if(!r.ok)throw new Error("HTTP "+r.status);const data=await r.json();
+ if(data&&data.code&&data.msg)throw new Error("API: "+data.msg);return data;
+ }finally{clearTimeout(timer);}
+}
 const COIN_IDS={BTCUSDT:"bitcoin",ETHUSDT:"ethereum",BNBUSDT:"binancecoin",SOLUSDT:"solana",XRPUSDT:"ripple",ADAUSDT:"cardano",DOGEUSDT:"dogecoin",LINKUSDT:"chainlink",AVAXUSDT:"avalanche-2",TONUSDT:"the-open-network",TRXUSDT:"tron",SUIUSDT:"sui",ONDOUSDT:"ondo",HYPEUSDT:"hyperliquid"};
 async function getCryptoPrice(symbol){
- const urls=["https://data-api.binance.vision/api/v3/ticker/24hr?symbol="+encodeURIComponent(symbol),"https://api.binance.com/api/v3/ticker/24hr?symbol="+encodeURIComponent(symbol)];let errors=[];
- for(const url of urls){try{const d=await fetchJson(url);const price=Number(d.lastPrice);if(!Number.isFinite(price)||price<=0)throw new Error("قیمت Binance نامعتبر است.");return {price,change:Number(d.priceChangePercent),high:Number(d.highPrice),low:Number(d.lowPrice),source:"Binance · بازار صرافی"};}catch(e){errors.push(e.message||"Binance unavailable");}}
- const id=COIN_IDS[symbol];if(!id)throw new Error("برای این نماد منبع جایگزین تعریف نشده است.");
- try{const rows=await fetchJson("https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids="+encodeURIComponent(id)+"&price_change_percentage=24h");const d=Array.isArray(rows)?rows[0]:null;const price=Number(d&&d.current_price);if(!Number.isFinite(price)||price<=0)throw new Error("CoinGecko قیمت معتبر برنگرداند.");return {price,change:Number(d.price_change_percentage_24h),high:Number(d.high_24h),low:Number(d.low_24h),source:"CoinGecko · قیمت تجمیعی مرجع USD"};}catch(e){errors.push(e.message||"CoinGecko unavailable");}
- throw new Error("دریافت قیمت از Binance و CoinGecko ناموفق بود. "+errors.join(" | "));
+ const errors=[],urls=["https://data-api.binance.vision/api/v3/ticker/24hr?symbol="+encodeURIComponent(symbol),"https://api.binance.com/api/v3/ticker/24hr?symbol="+encodeURIComponent(symbol)];
+ for(const url of urls){try{const d=await fetchJson(url),price=Number(d.lastPrice);if(!Number.isFinite(price)||price<=0)throw new Error("قیمت Binance نامعتبر است.");return {price,change:Number(d.priceChangePercent),high:Number(d.highPrice),low:Number(d.lowPrice),source:"Binance · بازار صرافی"};}catch(e){errors.push("Binance: "+(e.message||"ناموفق"));}}
+ const capIds={BTCUSDT:"bitcoin",ETHUSDT:"ethereum",BNBUSDT:"binance-coin",SOLUSDT:"solana",XRPUSDT:"xrp",ADAUSDT:"cardano",DOGEUSDT:"dogecoin",LINKUSDT:"chainlink",AVAXUSDT:"avalanche",TONUSDT:"toncoin",TRXUSDT:"tron",SUIUSDT:"sui",ONDOUSDT:"ondo",HYPEUSDT:"hyperliquid"};
+ try{const id=capIds[symbol];if(!id)throw new Error("شناسه CoinCap موجود نیست.");const d=await fetchJson("https://api.coincap.io/v2/assets/"+encodeURIComponent(id)),a=d&&d.data,price=Number(a&&a.priceUsd);if(!Number.isFinite(price)||price<=0)throw new Error("CoinCap قیمت معتبر نداد.");return {price,change:Number(a.changePercent24Hr),high:null,low:null,source:"CoinCap · قیمت مرجع USD"};}catch(e){errors.push("CoinCap: "+(e.message||"ناموفق"));}
+ try{const id=COIN_IDS[symbol];if(!id)throw new Error("شناسه CoinGecko موجود نیست.");const rows=await fetchJson("https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids="+encodeURIComponent(id)+"&price_change_percentage=24h"),d=Array.isArray(rows)?rows[0]:null,price=Number(d&&d.current_price);if(!Number.isFinite(price)||price<=0)throw new Error("CoinGecko قیمت معتبر برنگرداند.");return {price,change:Number(d.price_change_percentage_24h),high:Number(d.high_24h),low:Number(d.low_24h),source:"CoinGecko · قیمت تجمیعی مرجع USD"};}catch(e){errors.push("CoinGecko: "+(e.message||"ناموفق"));}
+ throw new Error("هر سه منبع قیمت رمزارز در دسترس نبودند. "+errors.join(" | "));
 }
-async function loadCryptoHistory(symbol){const urls=["https://data-api.binance.vision/api/v3/klines?symbol="+encodeURIComponent(symbol)+"&interval=1h&limit=100","https://api.binance.com/api/v3/klines?symbol="+encodeURIComponent(symbol)+"&interval=1h&limit=100"];for(const url of urls){try{const rows=await fetchJson(url);const vals=rows.map(x=>Number(x[4])).filter(x=>Number.isFinite(x)&&x>0);if(vals.length>0)return vals;}catch(e){}}
- const id=COIN_IDS[symbol];if(id){try{const d=await fetchJson("https://api.coingecko.com/api/v3/coins/"+encodeURIComponent(id)+"/market_chart?vs_currency=usd&days=7");const vals=(d.prices||[]).map(x=>Number(x[1])).filter(x=>Number.isFinite(x)&&x>0);if(vals.length)return vals;}catch(e){}}
- return [];}
-async function getForexPrice(symbol){const url="https://biquote.io/api/"+encodeURIComponent(symbol)+"?allowStale=false";const d=await fetchJson(url);const bid=Number(d.bid),ask=Number(d.ask),mid=Number(d.mid);const p=Number.isFinite(mid)&&mid>0?mid:(bid>0&&ask>0?(bid+ask)/2:NaN);if(!Number.isFinite(p)||p<=0||d.stale===true)throw new Error("قیمت معتبر و تازه از BiQuote دریافت نشد.");return {price:p,bid,ask,source:"BiQuote · فارکس/طلا"};}
-async function getPrice(){if(requestBusy)return;requestBusy=true;const s=$("symbol").value;setStatus("در حال دریافت قیمت…");try{let p,change=null,high=null,low=null,meta="";if(isCrypto(s)){const d=await getCryptoPrice(s);p=Number(d.price);change=Number.isFinite(d.change)?d.change:null;high=Number.isFinite(d.high)?d.high:null;low=Number.isFinite(d.low)?d.low:null;meta=d.source;if(currentSymbol!==s||prices.length<2){const hist=await loadCryptoHistory(s);if(hist.length)prices=hist.slice(-240);}}else{const d=await getForexPrice(s);p=d.price;meta=d.source+" | Bid: "+fmt(d.bid)+" | Ask: "+fmt(d.ask);if(currentSymbol!==s)prices=[];}
-if(!Number.isFinite(p)||p<=0)throw new Error("قیمت دریافتی معتبر نیست.");currentSymbol=s;if(!prices.length||prices[prices.length-1]!==p)prices.push(p);if(prices.length>240)prices=prices.slice(-240);currentPrice=p;$("price").textContent=fmt(p);$("priceMeta").textContent=meta+(isCrypto(s)?" · قیمت لحظه‌ای":"");$("change").textContent=change==null?"—":(change>=0?"+":"")+change.toFixed(2)+"%";$("change").style.color=change==null?"var(--muted)":change>=0?"var(--green)":"var(--red)";$("high").textContent=high?fmt(high):"—";$("low").textContent=low?fmt(low):"—";setStatus("آخرین دریافت: "+new Date().toLocaleTimeString("fa-IR"));const closed=window.HamrahTraderAgent.checkPrice(p,s);if(closed){setStatus("معامله با "+(closed.reason==="STOP_LOSS"?"حد ضرر":"حد سود")+" بسته شد.");updateBalance();renderHistory();}updateAgent();drawChart();renderPosition();}catch(e){const msg=e.name==="AbortError"?"زمان دریافت قیمت تمام شد.":(e.message||"خطای دریافت قیمت");setStatus(msg+" اگر اینترنت برقرار است، ممکن است دسترسی به سرویس در شبکه محدود باشد.");$("priceMeta").textContent="قیمت فعلی در دسترس نیست؛ برای معامله از قیمت قدیمی استفاده نکنید.";}finally{requestBusy=false;}}
-function trade(side){if(!currentPrice||currentSymbol!==$("symbol").value){setStatus("ابتدا قیمت معتبر نماد انتخاب‌شده را دریافت کنید.");return;}const qty=Number($("qty").value),sl=Number($("sl").value),tp=Number($("tp").value);if(!(Number.isFinite(qty)&&qty>0&&Number.isFinite(sl)&&sl>=0.1&&sl<=20&&Number.isFinite(tp)&&tp>=0.1&&tp<=50)){setStatus("حجم باید مثبت، حد ضرر بین ۰٫۱ تا ۲۰ و حد سود بین ۰٫۱ تا ۵۰ درصد باشد.");return;}try{const p=window.HamrahTraderAgent.openTrade(side,currentPrice,currentSymbol,{qty,sl,tp});setStatus("معامله آزمایشی "+(side==="BUY"?"خرید":"فروش")+" ثبت شد.");renderPosition();updateBalance();}catch(e){setStatus(e.message||"ثبت معامله ناموفق بود.");}}
-function closePosition(){try{if(!currentPrice||currentSymbol!==$("symbol").value)throw new Error("برای بستن معامله، نماد همان معامله را انتخاب و قیمت را تازه‌سازی کنید.");const t=window.HamrahTraderAgent.closeTrade(currentPrice,"MANUAL");setStatus("معامله آزمایشی بسته شد؛ سود/زیان تقریبی: "+fmt(t.pnl)+" دلار.");updateBalance();renderPosition();renderHistory();}catch(e){setStatus(e.message);}}
-$("refresh").addEventListener("click",getPrice);$("symbol").addEventListener("change",()=>{const p=window.HamrahTraderAgent.getStatus().position;if(p&&p.symbol!==$("symbol").value){setStatus("یک معامله روی "+p.symbol+" باز است؛ برای مدیریت آن همان نماد را انتخاب کنید.");}currentPrice=null;prices=[];currentSymbol="";$("price").textContent="—";getPrice();});$("buy").addEventListener("click",()=>trade("BUY"));$("sell").addEventListener("click",()=>trade("SELL"));$("closePosition").addEventListener("click",closePosition);$("fx").addEventListener("input",()=>{updateBalance();renderPosition();});
-window.addEventListener("load",()=>{window.HamrahTraderAgent.start();updateBalance();getPrice();setInterval(getPrice,30000);});
+async function loadCryptoHistory(symbol){
+ const urls=["https://data-api.binance.vision/api/v3/klines?symbol="+encodeURIComponent(symbol)+"&interval=1d&limit=365","https://api.binance.com/api/v3/klines?symbol="+encodeURIComponent(symbol)+"&interval=1d&limit=365"];
+ for(const url of urls){try{const rows=await fetchJson(url),vals=rows.map(x=>Number(x[4])).filter(x=>Number.isFinite(x)&&x>0);if(vals.length)return vals;}catch(e){}}
+ const id=COIN_IDS[symbol];if(id){try{const d=await fetchJson("https://api.coingecko.com/api/v3/coins/"+encodeURIComponent(id)+"/market_chart?vs_currency=usd&days=365"),vals=(d.prices||[]).map(x=>Number(x[1])).filter(x=>Number.isFinite(x)&&x>0);if(vals.length)return vals;}catch(e){}}
+ return [];
+}
+async function getForexPrice(symbol){
+ const d=await fetchJson("https://biquote.io/api/"+encodeURIComponent(symbol)+"?allowStale=false");
+ const bid=Number(d.bid),ask=Number(d.ask),mid=Number(d.mid),p=Number.isFinite(mid)&&mid>0?mid:(bid>0&&ask>0?(bid+ask)/2:NaN);
+ if(!Number.isFinite(p)||p<=0||d.stale===true)throw new Error("قیمت معتبر و تازه از BiQuote دریافت نشد.");
+ return {price:p,bid,ask,source:"BiQuote · فارکس/طلا"};
+}
+async function getPrice(){
+ if(requestBusy)return;requestBusy=true;const token=++requestToken,s=$("symbol").value;
+ currentPrice=null;$("price").textContent="—";setStatus("در حال دریافت قیمت تازه…");$("priceMeta").textContent="تا دریافت داده تازه، معامله غیرفعال است.";
+ try{
+  let p,change=null,high=null,low=null,meta="";
+  if(isCrypto(s)){
+   const d=await getCryptoPrice(s);if(token!==requestToken)return;
+   p=Number(d.price);change=Number.isFinite(d.change)?d.change:null;high=Number.isFinite(d.high)?d.high:null;low=Number.isFinite(d.low)?d.low:null;meta=d.source;
+   if(currentSymbol!==s||prices.length<2){const hist=await loadCryptoHistory(s);if(token!==requestToken)return;if(hist.length)prices=hist.slice(-365);}
+  }else{
+   const d=await getForexPrice(s);if(token!==requestToken)return;p=d.price;meta=d.source+" | Bid: "+fmt(d.bid)+" | Ask: "+fmt(d.ask);if(currentSymbol!==s)prices=[];
+  }
+  if(token!==requestToken||s!==$("symbol").value)return;
+  if(!Number.isFinite(p)||p<=0)throw new Error("قیمت دریافتی معتبر نیست.");
+  currentSymbol=s;if(!prices.length||prices[prices.length-1]!==p)prices.push(p);if(prices.length>365)prices=prices.slice(-365);currentPrice=p;
+  $("price").textContent=fmt(p);$("priceMeta").textContent=meta+(isCrypto(s)?" · قیمت لحظه‌ای":"");
+  $("change").textContent=change===null?"—":(change>=0?"+":"")+change.toFixed(2)+"%";
+  $("change").style.color=change===null?"var(--muted)":change>=0?"var(--green)":"var(--red)";
+  $("high").textContent=high!==null?fmt(high):"—";$("low").textContent=low!==null?fmt(low):"—";
+  $("chartNote").textContent=isCrypto(s)?"نمودار از کندل‌های روزانه تا حدود ۳۶۵ روز ساخته می‌شود؛ مقدار تاریخچه به دسترسی سرویس بازار بستگی دارد.":"برای فارکس و طلا در این نسخه فقط داده‌های دریافت‌شده در همین اجرا رسم می‌شود.";
+  setStatus("آخرین دریافت معتبر: "+new Date().toLocaleTimeString("fa-IR"));
+  const closed=window.HamrahTraderAgent.checkPrice(p,s);if(closed){setStatus("معامله با "+(closed.reason==="STOP_LOSS"?"حد ضرر":"حد سود")+" بسته شد.");updateBalance();renderHistory();}
+  updateAgent();drawChart();renderPosition();
+ }catch(e){
+  if(token!==requestToken)return;const msg=e.name==="AbortError"?"زمان دریافت قیمت تمام شد.":(e.message||"خطای دریافت قیمت");
+  currentPrice=null;$("price").textContent="—";$("priceMeta").textContent="قیمت معتبر در دسترس نیست؛ از قیمت قبلی برای معامله استفاده نکنید.";
+  $("change").textContent="—";$("high").textContent="—";$("low").textContent="—";
+  $("signal").textContent="WAIT · صبر";$("signal").className="wait";$("confidence").textContent="—";$("reason").textContent="داده معتبر بازار دریافت نشد؛ تحلیل متوقف شد.";
+  $("ema9").textContent="—";$("ema21").textContent="—";$("rsi").textContent="—";setStatus(msg+" ممکن است دسترسی شبکه به سرویس‌های قیمت محدود باشد.");renderPosition();
+ }finally{if(token===requestToken)requestBusy=false;}
+}
+function trade(side){
+ if(!currentPrice||currentSymbol!==$("symbol").value){setStatus("ابتدا قیمت معتبر نماد انتخاب‌شده را دریافت کنید.");return;}
+ const qty=Number($("qty").value),sl=Number($("sl").value),tp=Number($("tp").value);
+ if(!(Number.isFinite(qty)&&qty>0&&Number.isFinite(sl)&&sl>=0.1&&sl<=20&&Number.isFinite(tp)&&tp>=0.1&&tp<=50)){setStatus("حجم باید مثبت، حد ضرر بین ۰٫۱ تا ۲۰ و حد سود بین ۰٫۱ تا ۵۰ درصد باشد.");return;}
+ try{window.HamrahTraderAgent.openTrade(side,currentPrice,currentSymbol,{qty,sl,tp});setStatus("معامله آزمایشی "+(side==="BUY"?"خرید":"فروش")+" ثبت شد.");renderPosition();updateBalance();}
+ catch(e){setStatus(e.message||"ثبت معامله ناموفق بود.");}
+}
+function closePosition(){
+ try{if(!currentPrice||currentSymbol!==$("symbol").value)throw new Error("برای بستن معامله، نماد همان معامله را انتخاب و قیمت را تازه‌سازی کنید.");
+ const t=window.HamrahTraderAgent.closeTrade(currentPrice,"MANUAL");setStatus("معامله آزمایشی بسته شد؛ سود/زیان تقریبی: "+fmt(t.pnl)+" دلار.");updateBalance();renderPosition();renderHistory();}
+ catch(e){setStatus(e.message);}
+}
+$("refresh").addEventListener("click",()=>getPrice());
+$("symbol").addEventListener("change",()=>{
+ requestToken++;requestBusy=false;const p=window.HamrahTraderAgent.getStatus().position;
+ if(p&&p.symbol!==$("symbol").value)setStatus("یک معامله روی "+p.symbol+" باز است؛ برای مدیریت آن همان نماد را انتخاب کنید.");
+ currentPrice=null;prices=[];currentSymbol="";$("price").textContent="—";$("priceMeta").textContent="در حال دریافت قیمت نماد جدید…";
+ $("change").textContent="—";$("high").textContent="—";$("low").textContent="—";$("signal").textContent="WAIT · صبر";$("signal").className="wait";
+ $("confidence").textContent="—";$("reason").textContent="در انتظار داده معتبر نماد جدید…";$("ema9").textContent="—";$("ema21").textContent="—";$("rsi").textContent="—";getPrice();
+});
+$("buy").addEventListener("click",()=>trade("BUY"));$("sell").addEventListener("click",()=>trade("SELL"));
+$("closePosition").addEventListener("click",closePosition);
+$("fx").addEventListener("input",()=>{updateBalance();renderPosition();if(!$("historyCard").classList.contains("hidden"))renderHistory();});
+window.addEventListener("load",()=>{
+ if(!window.HamrahTraderAgent){setStatus("فایل agent.js بارگذاری نشده است؛ موتور معاملات آزمایشی فعال نیست.");$("buy").disabled=true;$("sell").disabled=true;return;}
+ window.HamrahTraderAgent.start();updateBalance();getPrice();
+ setInterval(()=>{if(document.visibilityState!=="hidden")getPrice();},30000);
+});
 if("serviceWorker"in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(()=>{}));
 </script></body></html>
