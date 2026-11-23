@@ -121,11 +121,35 @@ function renderPosition(){
  $("position").textContent=(p.side==="BUY"?"خرید ":"فروش ")+p.symbol+" | ورود: "+fmt(p.entry)+" | حجم: "+fmt(p.qty)+" | حدضرر: "+fmt(p.stopLoss)+" | حدسود: "+fmt(p.takeProfit)+" | سود/زیان: "+money;
 }
 function renderHistory(){
- const trades=window.HamrahTraderAgent.getStatus().trades;
- if(!trades.length){$("history").textContent="هنوز معامله‌ای ثبت نشده است.";return;}
+ const allTrades = window.HamrahTraderAgent.getStatus().trades || [];
+ const trades = allTrades.filter(t =>
+   t && typeof t === "object" &&
+   Number.isFinite(Number(t.pnl))
+ );
+
+ if(!trades.length){
+   $("history").textContent="هنوز معامله معتبری ثبت نشده است.";
+   return;
+ }
+
  const rate=Number($("fx").value);
- $("history").innerHTML="<div class='tablewrap'><table><thead><tr><th>نماد</th><th>جهت</th><th>ورود</th><th>خروج</th><th>USD</th><th>تومان</th><th>ریال</th></tr></thead><tbody>"+
- trades.map(t=>{const toman=Number.isFinite(rate)&&rate>0?t.pnl*rate:null;return "<tr><td>"+t.symbol+"</td><td>"+t.side+"</td><td>"+fmt(t.entry)+"</td><td>"+fmt(t.exit)+"</td><td style='color:"+(t.pnl>=0?"#35d49a":"#ff647c")+"'>"+fmt(t.pnl)+"</td><td>"+(toman===null?"—":fmt(toman))+"</td><td>"+(toman===null?"—":fmt(toman*10))+"</td></tr>";}).join("")+"</tbody></table></div>";
+
+ $("history").innerHTML=
+ "<div class='tablewrap'><table><thead><tr>"+
+ "<th>نماد</th><th>جهت</th><th>ورود</th>"+
+ "<th>خروج</th><th>USD</th><th>تومان</th>"+
+ "<th>ریال</th></tr></thead><tbody>"+
+ trades.map(t=>{
+   const pnl=Number(t.pnl);
+   const toman=Number.isFinite(rate)&&rate>0?pnl*rate:null;
+   return "<tr><td>"+t.symbol+"</td><td>"+t.side+
+   "</td><td>"+fmt(t.entryPrice??t.entry)+
+   "</td><td>"+fmt(t.exitPrice??t.exit)+
+   "</td><td style='color:"+(pnl>=0?"#35d49a":"#ff647c")+"'>"+
+   fmt(pnl)+"</td><td>"+(toman===null?"—":fmt(toman))+
+   "</td><td>"+(toman===null?"—":fmt(toman*10))+
+   "</td></tr>";
+ }).join("")+"</tbody></table></div>";
 }
 function showHistory(){$("historyCard").classList.remove("hidden");renderHistory();}
 async function fetchJson(url){
