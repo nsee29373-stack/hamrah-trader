@@ -15,6 +15,34 @@ select,input{background:#f5faff;color:var(--txt);border:1px solid #bfd5ed;border
 button{border:0;border-radius:12px;padding:12px 10px;font:inherit;font-weight:800;cursor:pointer;background:#e3efff;color:#19416f;box-shadow:0 3px 9px #5487b51c}button:disabled{opacity:.4}.primary{background:linear-gradient(100deg,#168edb,#3977e8);color:#fff}.buybtn{background:linear-gradient(100deg,#0ca77b,#22bb8d);color:#fff}.sellbtn{background:linear-gradient(100deg,#e85d72,#d83f62);color:#fff}.ghost{border:1px solid #c7dbf1;background:#f4f9ff}.actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:10px}.shortcuts{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}.shortcut{padding:12px 5px;text-align:center;font-size:11px;min-height:84px;background:linear-gradient(145deg,#fff,#e8f3ff);border:1px solid #c9def6;border-radius:16px}.shortcut span{display:block;font-size:27px;margin-bottom:6px;filter:drop-shadow(0 3px 3px #3977b544)}.sectiontitle{font-size:14px;font-weight:900;margin:2px 0 12px;color:#183e72}.hidden{display:none!important}canvas{width:100%;height:220px;display:block;background:linear-gradient(135deg,#eff8ff,#e4f5f6);border:1px solid #d3e6f7;border-radius:12px}.tradegrid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.tradegrid label{display:block;color:var(--muted);font-size:11px;margin-bottom:6px}.tablewrap{overflow-x:auto}table{width:100%;border-collapse:collapse;font-size:11px;min-width:650px}td,th{padding:9px 5px;border-bottom:1px solid #d8e7f5;text-align:right}th{color:var(--muted)}.notice{font-size:11px;color:#936100;line-height:1.9;background:#fff8e7;padding:9px;border-radius:10px}.status{font-size:11px;color:var(--muted);margin-top:8px;min-height:18px}
 .icon-nav{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:10px 0}.navbtn{display:flex;align-items:center;justify-content:center;gap:7px;padding:11px 5px;border:1px solid #c8def4;background:#ffffffd9;border-radius:14px;font-size:11px;color:#234b79}.navbtn .ico{font-size:20px}.navbtn.active{background:linear-gradient(120deg,#d7f4f1,#dceaff);border-color:#70c8d3;box-shadow:0 4px 14px #48a7c533;color:#075b8e}.view-panel{display:none}.view-panel.active{display:block;animation:panelIn .22s ease-out}@keyframes panelIn{from{opacity:.45;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}.home-market{background:linear-gradient(110deg,#0c477b,#087d9a);color:#fff;border:0}.home-market .sectiontitle,.home-market .label,.home-market .muted{color:#d7efff}.home-market .price{color:#fff}.home-market .metric{background:#ffffff1b;border-color:#ffffff35}.home-market .metric b{color:#fff}
 @media(min-width:600px){body{padding:22px}.price{font-size:35px}.icon-nav{grid-template-columns:repeat(5,1fr)}}
+/* داشبورد تمام‌صفحه و پررنگ همراه تریدر */
+:root{--bg:#0759a5;--panel:#fff;--panel2:#c5e8ff;--line:#65b9ef;--txt:#073765;--muted:#315f86;--cyan:#00b9e8;--green:#00a878;--red:#ed4265;--gold:#ffb21d;--shadow:0 7px 22px #003c7b38}
+html,body{width:100%;height:100%;min-height:0;overflow:hidden}
+body{padding:7px;background:radial-gradient(circle at 5% 0,#25b9f2 0,transparent 36%),radial-gradient(circle at 100% 35%,#00b991 0,transparent 32%),linear-gradient(145deg,#064b96,#087bc0 58%,#064b9b);color:#062f60}
+.app{width:100%;max-width:760px;height:100dvh;min-height:0;margin:0 auto;display:flex;flex-direction:column;gap:6px;overflow:hidden}
+.top{flex:0 0 auto;margin:0;padding:3px 5px;color:#fff}.brand{font-size:19px;color:#fff}.sub{font-size:10px;color:#d8f2ff;margin-top:2px}.live{padding:6px 9px;background:#b9ffe5;color:#006e50;border:1px solid #62e5b6}
+.card{margin:0;padding:9px;border-radius:15px;box-shadow:0 5px 16px #003d7930;border:1px solid #8bcdf5}
+.balance{flex:0 0 auto;gap:7px;padding:9px;background:linear-gradient(115deg,#fff,#c8eaff);border:2px solid #54b9f2}
+.balance .amount{font-size:19px;margin-top:3px;color:#064b99}.balance .label{font-size:10px;line-height:1.45}.balance .rial{font-size:13px;color:#a85c00}
+.icon-nav{flex:0 0 auto;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:5px;margin:0;padding:5px;background:#064987;border:1px solid #51b8f0;border-radius:14px}
+.navbtn{min-width:0;min-height:43px;display:flex;flex-direction:column;gap:1px;padding:4px 2px;border:1px solid #9bd8ff;background:linear-gradient(145deg,#eaf8ff,#b9e3ff);border-radius:10px;font-size:9px;font-weight:900;color:#06447f;box-shadow:0 2px 6px #003c7b25}
+.navbtn .ico{font-size:18px;line-height:1.15}.navbtn.active{background:linear-gradient(145deg,#ffcf4c,#ff9f1c);border:2px solid #fff;color:#613600;box-shadow:0 0 0 2px #ffb21d55}
+.view-panel{display:none;min-height:0}.view-panel.active{display:block;flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;animation:panelIn .18s ease-out}
+.home-market{background:linear-gradient(135deg,#063c79,#087eaa 70%,#00a88b);border:2px solid #58d4f0;color:#fff}
+.home-market .sectiontitle,.home-market .label,.home-market .muted{color:#e0f7ff}.home-market .price{color:#fff;font-size:clamp(23px,6vw,32px);margin:5px 0}.home-market .metric{background:#ffffff20;border-color:#ffffff55}.home-market .metric b{color:#fff}
+.sectiontitle{font-size:13px;margin:0 0 8px;color:#07539a}
+.metrics{gap:5px}.metric{padding:7px;background:#d9f0ff;border:1px solid #9fd7f6;border-radius:10px}.metric .label{font-size:10px}.metric b{font-size:12px}
+select,input{padding:9px;border:1px solid #7bbce9;background:#f3faff;border-radius:9px;font-size:12px}
+button{padding:10px 8px;border-radius:10px;font-size:12px}
+.primary{background:linear-gradient(110deg,#008fe0,#2458dc);color:#fff}.buybtn{background:linear-gradient(110deg,#00b783,#00a66d);color:#fff}.sellbtn{background:linear-gradient(110deg,#fa5270,#d92554);color:#fff}
+.price{font-size:25px;margin:6px 0}.muted{font-size:10px;line-height:1.55}
+.tradegrid{gap:7px}.tradegrid label{font-size:10px}.actions{gap:7px;margin-top:7px}
+canvas{height:clamp(145px,28vh,220px);background:#eaf8ff;border-color:#85c9f2}
+.notice{font-size:10px;padding:7px;line-height:1.6}
+.tablewrap{max-width:100%}footer{display:none!important}
+#historyCard{overflow:auto}
+@media(max-height:740px){body{padding:5px}.app{gap:4px}.top{padding:1px 4px}.brand{font-size:17px}.sub{font-size:9px}.balance{padding:6px}.balance .amount{font-size:17px}.icon-nav{gap:4px;padding:4px}.navbtn{min-height:38px;padding:3px 1px}.navbtn .ico{font-size:16px}.card{padding:8px}.sectiontitle{margin-bottom:6px}.metric{padding:5px}.price{font-size:22px}}
+@media(min-width:600px){body{padding:10px}.app{max-width:760px}.icon-nav{grid-template-columns:repeat(5,minmax(0,1fr))}}
 </style>
 </head>
 <body>
