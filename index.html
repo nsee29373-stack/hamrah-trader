@@ -69,9 +69,10 @@ button{border:0;border-radius:12px;padding:12px 10px;font:inherit;font-weight:70
 "use strict";
 const $=id=>document.getElementById(id);
 let currentPrice=null,positionMarkPrice=null,positionMarkSymbol="",prices=[],candles=[],currentSymbol="",requestBusy=false,requestToken=0,historyNeedsRefresh=true,positionQuoteBusy=false;
-let usdTomanRate=null,usdRateUpdatedAt=null,usdRateSource="",usdRateBusy=false,usdJpyRate=null,usdJpyBusy=false,usdtUsdRate=null,usdtRateBusy=false,currentPriceUnit="USD",positionPriceUnit="USD";
+let usdTomanRate=null,usdRateUpdatedAt=null,usdRateSource="",usdRateBusy=false,usdJpyRate=null,usdJpyBusy=false,usdtUsdRate=null,usdtRateBusy=false,currentPriceUnit="USD",positionPriceUnit="USD",positionQuoteError="";
 const isCrypto=s=>s.endsWith("USDT");
 const fmt=n=>Number.isFinite(Number(n))?Number(n).toLocaleString("en-US",{maximumFractionDigits:8}):"—";
+const fmtMoney=n=>Number.isFinite(Number(n))?Number(n).toLocaleString("en-US",{minimumFractionDigits:0,maximumFractionDigits:2}):"—";
 function setStatus(t){$("status").textContent=t}
 function usdIrrRate(){return Number.isFinite(usdTomanRate)&&usdTomanRate>0?usdTomanRate*10:null}
 function quoteToRialFactor(symbol,rawPrice,unit){
@@ -155,11 +156,11 @@ async function refreshUsdIrrRate(){
 }
 function updateBalance(){
  const st=window.HamrahTraderAgent.getStatus(),rate=usdTomanRate;
- $("balance").textContent="$"+fmt(st.balance);
- $("equityLabel").textContent="ارزش حساب با سود/زیان باز: $"+fmt(st.equity);
+ $("balance").textContent="$"+fmtMoney(st.balance);
+ $("equityLabel").textContent="ارزش حساب با سود/زیان باز: $"+fmtMoney(st.equity);
  if(Number.isFinite(rate)&&rate>0){const cash=st.balance*rate,equity=st.equity*rate;
- $("balanceIrr").textContent=fmt(cash)+" تومان";$("balanceRial").textContent=fmt(cash*10)+" ریال";
- $("equityIrr").textContent="ارزش کل حساب: "+fmt(equity)+" تومان";$("equityRial").textContent=fmt(equity*10)+" ریال";
+ $("balanceIrr").textContent=fmtMoney(cash)+" تومان";$("balanceRial").textContent=fmtMoney(cash*10)+" ریال";
+ $("equityIrr").textContent="ارزش کل حساب: "+fmtMoney(equity)+" تومان";$("equityRial").textContent=fmtMoney(equity*10)+" ریال";
  }else{$("balanceIrr").textContent="—";$("balanceRial").textContent="نرخ تبدیل معتبر نیست";$("equityIrr").textContent="ارزش کل حساب: —";$("equityRial").textContent="— ریال"}
 }
 function drawChart(){
@@ -182,7 +183,7 @@ function renderPosition(){
  const pnl=markValid?(positionMarkPrice-entry)*p.qty*dir:null;
  const factor=markValid?quoteToRialFactor(p.symbol,positionMarkPrice,positionPriceUnit):null;
  const pnlRial=pnl!==null&&factor!==null?pnl*factor:null;
- const money=pnl===null?"قیمت نماد معامله را دریافت کنید":fmt(pnl)+" (واحد مظنه)"+(pnlRial===null?" | نرخ ریالی ناموجود":" | "+fmt(pnlRial)+" ریال | "+fmt(pnlRial/10)+" تومان");
+ const money=pnl===null?(positionQuoteError||"در حال دریافت قیمت نماد معامله…"):fmt(pnl)+" (واحد مظنه)"+(pnlRial===null?" | نرخ ریالی ناموجود":" | "+fmt(pnlRial)+" ریال | "+fmt(pnlRial/10)+" تومان");
  const entryIrr=priceInRial(p.symbol,entry),slIrr=priceInRial(p.symbol,Number(p.stopLoss)),tpIrr=priceInRial(p.symbol,Number(p.takeProfit));
  $("position").textContent=(p.side==="BUY"?"خرید ":"فروش ")+p.symbol+" | ورود: "+formatRial(entryIrr)+" | حجم: "+fmt(p.qty)+" | حدضرر: "+formatRial(slIrr)+" | حدسود: "+formatRial(tpIrr)+" | سود/زیان: "+money
 }
@@ -244,9 +245,11 @@ async function getPrice(){
  $("priceMeta").textContent=d.source+(d.bid?" | Bid: "+formatRial(bidRial)+" | Ask: "+formatRial(askRial):"")+
   (usdTomanRate>0?" | نرخ تبدیل دلار: "+fmt(usdTomanRate*10)+" ریال":" | در انتظار نرخ تبدیل دلار");
  $("change").textContent=Number.isFinite(d.change)?(d.change>=0?"+":"")+d.change.toFixed(2)+"%":"—";$("change").style.color=d.change>=0?"var(--green)":"var(--red)";
- $("high").textContent=d.high>0?formatRial(priceInRial(s,d.high)):"—";$("low").textContent=d.low>0?formatRial(priceInRial(s,d.low)):"—";
- $("chartNote").textContent=candles.length?"کندل‌های OHLC واقعی از Binance · تعداد کندل: "+candles.length:"داده کندلی در دسترس نبود؛ در صورت وجود، نمودار خطی قیمت مرجع نمایش داده می‌شود.";
- positionMarkPrice=p;positionMarkSymbol=s;positionPriceUnit=d.quoteCurrency||"USD";
+ const safeHigh=d.high>0?Math.max(d.high,p):p,safeLow=d.low>0?Math.min(d.low,p):p;
+ $("high").textContent=formatRial(priceInRial(s,safeHigh));$("low").textContent=formatRial(priceInRial(s,safeLow));
+ $("chartNote").textContent=candles.length?"کندل‌های OHLC از Binance · تعداد کندل: "+candles.length:(prices.length>1?"سرویس کندلی در دسترس نبود؛ نمودار خطی از قیمت‌های دریافت‌شده نمایش داده می‌شود.":"هنوز داده کافی برای رسم نمودار دریافت نشده است.");
+ const openNow=window.HamrahTraderAgent.getStatus().position;
+ if(openNow&&openNow.symbol===s){positionMarkPrice=p;positionMarkSymbol=s;positionPriceUnit=d.quoteCurrency||"USD";positionQuoteError="";}
  const closed=window.HamrahTraderAgent.checkPrice(p,s);if(closed){setStatus("معامله با "+(closed.reason==="STOP_LOSS"?"حد ضرر":"حد سود")+" بسته شد.");renderHistory()}
  updateBalance();updateAgent();drawChart();renderPosition();if(!closed)setStatus("آخرین دریافت معتبر: "+new Date().toLocaleTimeString("fa-IR"));
  }catch(e){if(token!==requestToken)return;currentPrice=null;$("price").textContent="— ریال";$("priceRaw").textContent="قیمت مرجع: —";$("priceMeta").textContent="قیمت معتبر در دسترس نیست؛ از قیمت قبلی برای معامله استفاده نکنید.";
@@ -260,10 +263,12 @@ async function refreshOpenPositionQuote(){
  if(!p||!p.symbol)return;
  positionQuoteBusy=true;
  try{
-  const d=isCrypto(p.symbol)?await getCryptoPrice(p.symbol):await getForexPrice(p.symbol);
+  let d;
+  if(p.symbol===currentSymbol&&Number.isFinite(currentPrice)&&currentPrice>0){d={price:currentPrice,quoteCurrency:currentPriceUnit};}
+  else{d=isCrypto(p.symbol)?await getCryptoPrice(p.symbol):await getForexPrice(p.symbol);}
   const price=Number(d.price);
   if(!(price>0))throw Error("قیمت موقعیت باز معتبر نیست");
-  positionMarkPrice=price;positionMarkSymbol=p.symbol;positionPriceUnit=d.quoteCurrency||"USD";if(p.symbol==="USDJPY")usdJpyRate=price;
+  positionMarkPrice=price;positionMarkSymbol=p.symbol;positionPriceUnit=d.quoteCurrency||"USD";positionQuoteError="";if(p.symbol==="USDJPY")usdJpyRate=price;
   const closed=window.HamrahTraderAgent.checkPrice(price,p.symbol);
   if(closed){
    setStatus("معامله "+p.symbol+" با "+(closed.closeReason==="STOP_LOSS"?"حد ضرر":closed.closeReason==="TAKE_PROFIT"?"حد سود":"شرط خروج") +" بسته شد.");
@@ -273,7 +278,7 @@ async function refreshOpenPositionQuote(){
   renderPosition();
  }catch(e){
   // Keep the position safely open; never substitute the selected symbol's price.
-  positionMarkPrice=null;positionMarkSymbol="";
+  positionMarkPrice=null;positionMarkSymbol="";positionQuoteError="قیمت فعلی "+p.symbol+" دریافت نشد؛ "+(e&&e.message?e.message:"خطای شبکه");
   renderPosition();
  }finally{positionQuoteBusy=false}
 }
@@ -281,16 +286,22 @@ function trade(side){
  if(!currentPrice||currentSymbol!==$("symbol").value){setStatus("ابتدا قیمت معتبر نماد انتخاب‌شده را دریافت کنید.");return}
  const qty=+$("qty").value,sl=+$("sl").value,tp=+$("tp").value;
  if(!(qty>0&&Number.isFinite(qty)&&sl>=.1&&sl<=20&&tp>=.1&&tp<=50)){setStatus("حجم باید مثبت، حد ضرر بین ۰٫۱ تا ۲۰ و حد سود بین ۰٫۱ تا ۵۰ درصد باشد.");return}
- try{window.HamrahTraderAgent.openTrade(side,currentPrice,currentSymbol,{qty,sl,tp});setStatus("معامله آزمایشی "+(side==="BUY"?"خرید":"فروش")+" ثبت شد.");positionMarkPrice=currentPrice;positionMarkSymbol=currentSymbol;renderPosition();updateBalance()}catch(e){setStatus(e.message||"ثبت معامله ناموفق بود.")}
+ try{window.HamrahTraderAgent.openTrade(side,currentPrice,currentSymbol,{qty,sl,tp});setStatus("معامله آزمایشی "+(side==="BUY"?"خرید":"فروش")+" ثبت شد.");positionMarkPrice=currentPrice;positionMarkSymbol=currentSymbol;positionPriceUnit=currentPriceUnit;positionQuoteError="";renderPosition();updateBalance()}catch(e){setStatus(e.message||"ثبت معامله ناموفق بود.")}
 }
 function closePosition(){
- try{if(!currentPrice||currentSymbol!==$("symbol").value)throw Error("برای بستن معامله، نماد همان معامله را انتخاب و قیمت را تازه‌سازی کنید.");
- const t=window.HamrahTraderAgent.closeTrade(currentPrice,"MANUAL");if(!t)throw Error("معامله بازی برای بستن وجود ندارد.");
- setStatus("معامله آزمایشی بسته شد؛ سود/زیان تقریبی: "+fmt(t.pnl)+" دلار.");positionMarkPrice=null;positionMarkSymbol="";updateBalance();renderPosition();renderHistory()
+ try{
+  const p=window.HamrahTraderAgent.getStatus().position;
+  if(!p)throw Error("معامله بازی برای بستن وجود ندارد.");
+  let exitPrice=null;
+  if(positionMarkSymbol===p.symbol&&Number.isFinite(positionMarkPrice)&&positionMarkPrice>0)exitPrice=positionMarkPrice;
+  else if(currentSymbol===p.symbol&&Number.isFinite(currentPrice)&&currentPrice>0)exitPrice=currentPrice;
+  if(!(exitPrice>0))throw Error("قیمت تازه نماد معامله هنوز دریافت نشده است؛ کمی صبر کنید و دوباره بزنید.");
+  const t=window.HamrahTraderAgent.closeTrade(exitPrice,"MANUAL");if(!t)throw Error("معامله بازی برای بستن وجود ندارد.");
+  setStatus("معامله آزمایشی بسته شد؛ سود/زیان: "+fmt(t.pnl)+" واحد مظنه.");positionMarkPrice=null;positionMarkSymbol="";positionQuoteError="";updateBalance();renderPosition();renderHistory()
  }catch(e){setStatus(e.message)}
 }
 $("refresh").addEventListener("click",getPrice);$("buy").addEventListener("click",()=>trade("BUY"));$("sell").addEventListener("click",()=>trade("SELL"));$("closePosition").addEventListener("click",closePosition);
-$("symbol").addEventListener("change",()=>{requestToken++;requestBusy=false;currentPrice=null;positionMarkPrice=null;positionMarkSymbol="";prices=[];candles=[];currentSymbol="";historyNeedsRefresh=true;$("price").textContent="— ریال";$("priceRaw").textContent="قیمت مرجع: —";$("priceMeta").textContent="در حال دریافت قیمت نماد جدید…";$("change").textContent=$("high").textContent=$("low").textContent="—";$("signal").textContent="WAIT · صبر";$("signal").className="wait";$("confidence").textContent="—";$("reason").textContent="در انتظار داده معتبر نماد جدید…";$("ema9").textContent=$("ema21").textContent=$("rsi").textContent="—";drawChart();renderPosition();getPrice();refreshOpenPositionQuote()});
+$("symbol").addEventListener("change",()=>{requestToken++;requestBusy=false;currentPrice=null;prices=[];candles=[];currentSymbol="";historyNeedsRefresh=true;$("price").textContent="— ریال";$("priceRaw").textContent="قیمت مرجع: —";$("priceMeta").textContent="در حال دریافت قیمت نماد جدید…";$("change").textContent=$("high").textContent=$("low").textContent="—";$("signal").textContent="WAIT · صبر";$("signal").className="wait";$("confidence").textContent="—";$("reason").textContent="در انتظار داده معتبر نماد جدید…";$("ema9").textContent=$("ema21").textContent=$("rsi").textContent="—";drawChart();renderPosition();getPrice();refreshOpenPositionQuote()});
 $("refreshChart").addEventListener("click",()=>{historyNeedsRefresh=true;getPrice()});$("chartInterval").addEventListener("change",()=>{historyNeedsRefresh=true;candles=[];prices=[];getPrice()});
 window.addEventListener("load",()=>{if(!window.HamrahTraderAgent){setStatus("فایل agent.js بارگذاری نشده است؛ موتور معاملات آزمایشی فعال نیست.");$("buy").disabled=$("sell").disabled=$("closePosition").disabled=true;return}
  window.HamrahTraderAgent.start();updateBalance();refreshUsdIrrRate();refreshUsdJpyRate();refreshUsdtUsdRate();getPrice();refreshOpenPositionQuote();setInterval(()=>{if(document.visibilityState!=="hidden"){getPrice();refreshOpenPositionQuote()}},30000);setInterval(()=>{if(document.visibilityState!=="hidden"){refreshUsdIrrRate();refreshUsdJpyRate();refreshUsdtUsdRate()}},5*60*1000)});
