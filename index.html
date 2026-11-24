@@ -68,6 +68,25 @@ body{padding:0!important;background:radial-gradient(ellipse at 50% -12%,#174c9b 
 #high,#low{display:inline-block;background:#f1f4f8;color:#111827;border:1px solid #cbd5e1;border-radius:6px;padding:2px 5px}
 #change{display:inline-block;background:#f1f4f8;color:#111827;border:1px solid #cbd5e1;border-radius:7px;padding:3px 7px}
 
+
+/* اصلاح نهایی نمایش بازار در موبایل: قیمت‌های سقف و کف تمام‌عرض و خوانا */
+#view-market .marketgrid{grid-template-columns:minmax(0,1fr)!important;gap:10px!important;height:auto!important;align-items:stretch!important}
+#view-market .marketleft{width:100%;min-width:0;gap:4px}
+#view-market .marketright{width:100%;min-width:0;border-right:0!important;border-top:1px solid #2864a5;padding:9px 0 0!important;display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:center;gap:7px 9px!important}
+#view-market .marketright>.label{grid-column:1;grid-row:1;font-size:10px!important}
+#view-market .marketright>#change{grid-column:2;grid-row:1;justify-self:stretch;text-align:center;font-size:15px!important}
+#view-market .marketright>.metrics{grid-column:1/-1;grid-row:2;display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:9px!important;width:100%;margin:0!important}
+#view-market .marketright>.metrics .metric{min-width:0;padding:9px 10px!important;background:linear-gradient(145deg,#0a2044,#07152e);border:1px solid #315b91;border-radius:11px;text-align:center}
+#view-market .marketright>.metrics .metric span{font-size:10px!important;display:block;margin-bottom:5px}
+#view-market .marketright>.metrics .metric b{display:block;direction:rtl!important;text-align:center!important;white-space:nowrap!important;overflow-wrap:normal!important;word-break:normal!important;font-size:clamp(12px,3.4vw,17px)!important;line-height:1.5;margin:0!important;font-weight:900}
+#view-market #high{color:#1685ff!important;background:#edf5ff!important;border:1px solid #8bbcff!important;border-radius:8px;padding:4px 6px!important;text-shadow:none!important}
+#view-market #low{color:#d01832!important;background:#fff0f2!important;border:1px solid #ffadb9!important;border-radius:8px;padding:4px 6px!important;text-shadow:none!important}
+#view-market .marketright>.status{grid-column:1/-1;grid-row:3;font-size:9px!important;line-height:1.5!important;margin:0!important;min-height:0!important;text-align:center}
+#view-market #price{width:100%;max-width:100%;text-align:center!important;font-size:clamp(24px,6.4vw,39px)!important;white-space:nowrap!important;overflow:hidden;text-overflow:ellipsis;padding:8px 9px!important;margin:7px 0!important}
+#view-market #priceRaw{display:block;width:100%;text-align:center;font-size:10px!important;line-height:1.6;padding:6px 8px!important;overflow-wrap:anywhere}
+#view-market #priceMeta{font-size:9px!important;text-align:center}
+@media(max-width:380px){#view-market .marketright>.metrics .metric{padding:7px 5px!important}#view-market .marketright>.metrics .metric b{font-size:11px!important}#view-market .marketright>.metrics .metric span{font-size:9px!important}}
+
 </style>
 
 </head>
