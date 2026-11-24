@@ -53,6 +53,21 @@ body{padding:0!important;background:radial-gradient(ellipse at 50% -12%,#174c9b 
 .footer{display:none!important}
 @media(max-height:700px){.app{padding:7px 9px}.home-view.active{gap:7px}.top{min-height:34px}.brand{font-size:19px}.sub{display:none}.toolmark{width:29px;height:29px}.balance{padding:7px 9px!important}.amount{font-size:20px;margin:2px 0}.amount.rial{font-size:15px}.balance .muted{font-size:7px}.balancebar{padding:3px;font-size:8px}.home-grid{gap:6px}.home-tile{padding:7px 10px;border-radius:13px}.tile-icon{font-size:24px;margin-bottom:2px}.home-tile b{font-size:10px}.home-tile small{font-size:8px}.home-foot{font-size:7px}}
 @media(max-width:360px){.app{padding:7px}.home-grid{gap:6px}.home-tile{padding:8px}.home-tile b{font-size:10px}.home-tile small{font-size:7px}.balance{gap:4px}.balancebar{font-size:7px}.toptools{gap:4px}.live{padding:6px 7px}}
+
+/* رنگ جهت حرکت نرخ‌ها: بدون تغییر=مشکی، صعود=آبی، نزول=قرمز */
+.rate-figure{display:inline-block!important;background:#f1f4f8!important;color:#111827!important;text-shadow:none!important;border:1px solid #cbd5e1;border-radius:8px;padding:3px 8px;line-height:1.45}
+.rate-figure.trend-up{color:#075ed1!important}
+.rate-figure.trend-down{color:#d01832!important}
+.rate-figure.trend-flat{color:#111827!important}
+#price{background:#f1f4f8!important;color:#111827!important;text-shadow:none!important;border:1px solid #cbd5e1;border-radius:9px;padding:4px 9px;width:max-content;max-width:100%;margin:5px 0}
+#price.trend-up{color:#075ed1!important}#price.trend-down{color:#d01832!important}#price.trend-flat{color:#111827!important}
+#priceRaw{display:inline-block;background:#f1f4f8;color:#111827;border:1px solid #cbd5e1;border-radius:7px;padding:3px 7px}
+#priceRaw.trend-up{color:#075ed1}#priceRaw.trend-down{color:#d01832}#priceRaw.trend-flat{color:#111827}
+#fxDisplay,#fxDisplayMirror{display:inline-block;background:#f1f4f8;color:#111827;border:1px solid #cbd5e1;border-radius:8px;padding:3px 8px}
+#fxDisplay.trend-up,#fxDisplayMirror.trend-up{color:#075ed1!important}#fxDisplay.trend-down,#fxDisplayMirror.trend-down{color:#d01832!important}#fxDisplay.trend-flat,#fxDisplayMirror.trend-flat{color:#111827!important}
+#high,#low{display:inline-block;background:#f1f4f8;color:#111827;border:1px solid #cbd5e1;border-radius:6px;padding:2px 5px}
+#change{display:inline-block;background:#f1f4f8;color:#111827;border:1px solid #cbd5e1;border-radius:7px;padding:3px 7px}
+
 </style>
 
 </head>
@@ -123,6 +138,17 @@ let usdTomanRate=null,usdRateUpdatedAt=null,usdRateSource="",usdRateBusy=false,u
 const isCrypto=s=>s.endsWith("USDT");
 const fmt=n=>Number.isFinite(Number(n))?Number(n).toLocaleString("en-US",{maximumFractionDigits:8}):"—";
 const fmtMoney=n=>Number.isFinite(Number(n))?Number(n).toLocaleString("en-US",{minimumFractionDigits:0,maximumFractionDigits:2}):"—";
+const trendMemory=new Map();
+function setRateTrend(el,key,value){
+ if(!el||!Number.isFinite(Number(value))){if(el)el.classList.remove("trend-up","trend-down","trend-flat");return}
+ const n=Number(value),prev=trendMemory.get(key);el.classList.add("rate-figure");
+ if(Number.isFinite(prev)){const eps=Math.max(Math.abs(prev)*1e-10,1e-12);if(Math.abs(n-prev)<=eps)return;el.classList.remove("trend-up","trend-down","trend-flat");el.classList.add(n>prev?"trend-up":"trend-down")}else{el.classList.remove("trend-up","trend-down","trend-flat");el.classList.add("trend-flat")}
+ trendMemory.set(key,n);
+}
+function setSignedTrend(el,value){
+ if(!el||!Number.isFinite(Number(value)))return;
+ const n=Number(value);el.classList.remove("trend-up","trend-down","trend-flat");el.classList.add(n>0?"trend-up":n<0?"trend-down":"trend-flat");
+}
 function setStatus(t){$("status").textContent=t}
 function usdIrrRate(){return Number.isFinite(usdTomanRate)&&usdTomanRate>0?usdTomanRate*10:null}
 function quoteToRialFactor(symbol,rawPrice,unit){
@@ -168,7 +194,7 @@ async function refreshUsdIrrRate(){
   updateBalance();
   renderPosition();
   if(currentPrice>0&&currentSymbol===$("symbol").value){
-   $("price").textContent=formatRial(priceInRial(currentSymbol,currentPrice,currentPriceUnit));
+   $("price").textContent=formatRial(priceInRial(currentSymbol,currentPrice,currentPriceUnit));setRateTrend($("price"),"market-rial-"+currentSymbol,priceInRial(currentSymbol,currentPrice,currentPriceUnit));
    if(currentHighRaw>0)$("high").textContent=formatRial(priceInRial(currentSymbol,currentHighRaw,currentPriceUnit));
    if(currentLowRaw>0)$("low").textContent=formatRial(priceInRial(currentSymbol,currentLowRaw,currentPriceUnit));
    $("priceMeta").textContent=$("priceMeta").textContent.replace(/(?:در انتظار نرخ تبدیل دلار|نرخ تبدیل دلار:.*)$/,"نرخ تبدیل دلار: "+fmt(price*10)+" ریال");
@@ -286,10 +312,10 @@ async function getPrice(){
   else{d=await getForexPrice(s);if(currentSymbol!==s){prices=[];candles=[]}}
   if(token!==requestToken||s!==$("symbol").value)return;const p=Number(d.price);if(!(p>0))throw Error("قیمت دریافتی معتبر نیست");
   currentSymbol=s;currentPriceUnit=d.quoteCurrency||"USD";if(s==="USDJPY")usdJpyRate=p;if(!prices.length||prices[prices.length-1]!==p)prices.push(p);if(prices.length>500)prices=prices.slice(-500);currentPrice=p;
-  $("price").textContent=formatRial(priceInRial(s,p,currentPriceUnit));$("priceRaw").textContent="قیمت مرجع بازار: "+fmt(p)+(isCrypto(s)?" USD (برآوردشده از USDT)":s==="USDJPY"?" JPY per USD":" USD per unit");
+  $("price").textContent=formatRial(priceInRial(s,p,currentPriceUnit));setRateTrend($("price"),"market-rial-"+s,priceInRial(s,p,currentPriceUnit));$("priceRaw").textContent="قیمت مرجع بازار: "+fmt(p)+(isCrypto(s)?" USD (برآوردشده از USDT)":s==="USDJPY"?" JPY per USD":" USD per unit");setRateTrend($("priceRaw"),"market-raw-"+s,p);
   const bidRial=d.bid>0?priceInRial(s,d.bid,currentPriceUnit):null,askRial=d.ask>0?priceInRial(s,d.ask,currentPriceUnit):null;
   $("priceMeta").textContent=d.source+(d.bid?" | Bid: "+formatRial(bidRial)+" | Ask: "+formatRial(askRial):"")+(usdTomanRate>0?" | نرخ تبدیل دلار: "+fmt(usdTomanRate*10)+" ریال":" | در انتظار نرخ تبدیل دلار");
-  $("change").textContent=Number.isFinite(d.change)?(d.change>=0?"+":"")+d.change.toFixed(2)+"%":"—";$("change").style.color=d.change>=0?"var(--green)":"var(--red)";
+  $("change").textContent=Number.isFinite(d.change)?(d.change>=0?"+":"")+d.change.toFixed(2)+"%":"—";setSignedTrend($("change"),d.change);
   const safeHigh=d.high>0?Math.max(d.high,p):p,safeLow=d.low>0?Math.min(d.low,p):p;currentHighRaw=safeHigh;currentLowRaw=safeLow;$("high").textContent=formatRial(priceInRial(s,safeHigh,currentPriceUnit));$("low").textContent=formatRial(priceInRial(s,safeLow,currentPriceUnit));
   $("chartNote").textContent=candles.length?"کندل‌های OHLC دریافت شد · تعداد: "+candles.length:(prices.length>1?"تاریخچه کندلی در دسترس نبود؛ نمودار قیمت‌های دریافت‌شده نمایش داده می‌شود.":"هنوز داده کافی برای نمودار وجود ندارد.");
   const openNow=window.HamrahTraderAgent.getStatus().position;if(openNow&&openNow.symbol===s){positionMarkPrice=p;positionMarkSymbol=s;positionPriceUnit=currentPriceUnit;positionQuoteError=""}
@@ -321,7 +347,7 @@ function closePosition(){
  }catch(e){setStatus(e.message)}
 }
 $("refresh").addEventListener("click",getPrice);$("buy").addEventListener("click",()=>trade("BUY"));$("sell").addEventListener("click",()=>trade("SELL"));$("closePosition").addEventListener("click",closePosition);
-$("symbol").addEventListener("change",()=>{requestToken++;requestBusy=false;currentPrice=null;currentHighRaw=null;currentLowRaw=null;prices=[];candles=[];currentSymbol="";historyNeedsRefresh=true;$("price").textContent="— ریال";$("priceRaw").textContent="قیمت مرجع: —";$("priceMeta").textContent="در حال دریافت قیمت نماد جدید…";$("change").textContent=$("high").textContent=$("low").textContent="—";$("signal").textContent="WAIT · صبر";$("signal").className="wait";$("confidence").textContent="—";$("reason").textContent="در انتظار داده معتبر نماد جدید…";$("ema9").textContent=$("ema21").textContent=$("rsi").textContent="—";drawChart();renderPosition();getPrice();refreshOpenPositionQuote()});
+$("symbol").addEventListener("change",()=>{requestToken++;requestBusy=false;currentPrice=null;currentHighRaw=null;currentLowRaw=null;prices=[];candles=[];currentSymbol="";historyNeedsRefresh=true;$("price").textContent="— ریال";$("price").classList.remove("trend-up","trend-down","trend-flat");$("priceRaw").textContent="قیمت مرجع: —";$("priceRaw").classList.remove("trend-up","trend-down","trend-flat");$("priceMeta").textContent="در حال دریافت قیمت نماد جدید…";$("change").textContent=$("high").textContent=$("low").textContent="—";$("signal").textContent="WAIT · صبر";$("signal").className="wait";$("confidence").textContent="—";$("reason").textContent="در انتظار داده معتبر نماد جدید…";$("ema9").textContent=$("ema21").textContent=$("rsi").textContent="—";drawChart();renderPosition();getPrice();refreshOpenPositionQuote()});
 $("refreshChart").addEventListener("click",()=>{historyNeedsRefresh=true;getPrice()});$("chartInterval").addEventListener("change",()=>{historyNeedsRefresh=true;candles=[];prices=[];getPrice()});
 window.addEventListener("load",()=>{
  if(!window.HamrahTraderAgent){setStatus("فایل agent.js بارگذاری نشده است؛ موتور معاملات آزمایشی فعال نیست.");$("buy").disabled=$("sell").disabled=$("closePosition").disabled=true;return}
@@ -332,7 +358,7 @@ window.addEventListener("load",()=>{
 if("serviceWorker"in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(()=>{}));
 </script>
 <script>
-(function(){const fx=document.getElementById('fx'),fxDisplay=document.getElementById('fxDisplay');const sync=()=>{if(fx&&fxDisplay)fxDisplay.textContent=fx.value||'در حال دریافت…'};sync();setInterval(sync,1500);const bal=document.getElementById('balanceRial'),tom=document.getElementById('balanceIrr'),rm=document.getElementById('balanceRialMirror'),tm=document.getElementById('balanceTomanMirror');const mirror=()=>{if(rm&&bal)rm.textContent=bal.textContent;if(tm&&tom)tm.textContent=tom.textContent};mirror();setInterval(mirror,1500)})();
+(function(){const fx=document.getElementById('fx'),fxDisplay=document.getElementById('fxDisplay'),fxMirror=document.getElementById('fxDisplayMirror');const sync=()=>{if(fx&&fxDisplay){fxDisplay.textContent=fx.value||'در حال دریافت…';const n=Number(String(fx.value||'').replace(/,/g,''));if(Number.isFinite(n)&&n>0){setRateTrend(fxDisplay,'usd-toman',n);if(fxMirror){fxMirror.textContent=fx.value;setRateTrend(fxMirror,'usd-toman-mirror',n)}}}};sync();setInterval(sync,1500);const bal=document.getElementById('balanceRial'),tom=document.getElementById('balanceIrr'),rm=document.getElementById('balanceRialMirror'),tm=document.getElementById('balanceTomanMirror');const mirror=()=>{if(rm&&bal)rm.textContent=bal.textContent;if(tm&&tom)tm.textContent=tom.textContent};mirror();setInterval(mirror,1500)})();
 </script>
 
 <script>
