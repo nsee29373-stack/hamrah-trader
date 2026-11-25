@@ -87,9 +87,22 @@ body{padding:0!important;background:radial-gradient(ellipse at 50% -12%,#174c9b 
 #view-market #priceMeta{font-size:9px!important;text-align:center}
 @media(max-width:380px){#view-market .marketright>.metrics .metric{padding:7px 5px!important}#view-market .marketright>.metrics .metric b{font-size:11px!important}#view-market .marketright>.metrics .metric span{font-size:9px!important}}
 
+
+/* Emerging crypto panel */
+.tile-emerging{grid-column:1/-1;min-height:62px;flex-direction:row;align-items:center;justify-content:space-between;text-align:right;padding:9px 14px;border-color:#b77bff;background:linear-gradient(100deg,#754500 0%,#332052 48%,#250c76 100%);box-shadow:0 0 17px #9a42ff55,inset 0 0 20px #ffc92822}
+.tile-emerging .tile-icon{font-size:27px;margin:0 0 0 8px}.tile-emerging .tile-copy{display:flex;flex-direction:column;gap:4px;flex:1}.tile-emerging b{font-size:12px}.tile-emerging small{font-size:9px}.tile-emerging .tile-arrow{font-size:25px;color:#fff}
+#view-emerging .emerging-toolbar{display:flex;gap:8px;align-items:center;margin:8px 0}#view-emerging .emerging-toolbar button{flex:1}
+.emerging-note{font-size:10px;color:#a9c5e8;line-height:1.9;margin:8px 2px}
+.emerging-list{display:grid;grid-template-columns:1fr;gap:8px}
+.emerging-item{display:grid;grid-template-columns:42px minmax(0,1fr) auto;gap:9px;align-items:center;padding:10px;border:1px solid #31568e;border-radius:13px;background:linear-gradient(120deg,#0d2852,#07152d);text-align:right;width:100%}
+.emerging-item:active{transform:scale(.99)}.emerging-rank{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;background:#132d58;color:#67dcff;font-weight:900;font-size:12px}
+.emerging-name{min-width:0}.emerging-name b{display:block;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.emerging-name small{display:block;color:#9eb8dc;font-size:9px;margin-top:4px;direction:ltr;text-align:right}
+.emerging-price{text-align:left;direction:ltr;min-width:92px}.emerging-price b{display:block;font-size:11px}.emerging-price small{font-size:9px}.emerging-up{color:#00e89a}.emerging-down{color:#ff6278}
+.emerging-detail{border:1px solid #8653d9;background:linear-gradient(145deg,#24104e,#071936);border-radius:16px;padding:12px;margin-top:10px}.emerging-detail h3{font-size:14px;margin:0 0 7px}.emerging-detail p{font-size:10px;line-height:1.9;color:#c0d2ec}.emerging-stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}.emerging-stats div{padding:8px;background:#07152d;border:1px solid #254574;border-radius:9px;min-width:0}.emerging-stats small{display:block;color:#9bb8dd;font-size:9px}.emerging-stats b{display:block;font-size:11px;direction:ltr;text-align:right;overflow-wrap:anywhere;margin-top:4px}.emerging-chart{height:110px;width:100%;display:block;margin:8px 0;background:#06132b;border-radius:10px}
+@media(max-height:700px){.tile-emerging{min-height:48px;padding:6px 10px}.tile-emerging .tile-icon{font-size:22px}.tile-emerging b{font-size:10px}.tile-emerging small{font-size:8px}}
+
 </style>
 
-<style>@media(max-width:760px){.home-grid{grid-template-rows:repeat(4,minmax(0,1fr))}.home-view.active{overflow-y:auto!important}.home-menu{min-height:520px}}</style>
 </head>
 <body>
 <main class="app">
@@ -109,11 +122,15 @@ body{padding:0!important;background:radial-gradient(ellipse at 50% -12%,#174c9b 
   <button class="home-tile tile-chart" onclick="openView('chart')"><span class="tile-icon">📈</span><b>نمودار بازار</b><small>تاریخچه تا ۳۶۵ روز</small></button>
   <button class="home-tile tile-history" onclick="showHistory()"><span class="tile-icon">📋</span><b>تاریخچه معاملات</b><small>گزارش سود و زیان</small></button>
   <button class="home-tile tile-account" onclick="openView('account')"><span class="tile-icon">💱</span><b>حساب و تبدیل ارز</b><small>موجودی ریالی و نرخ دلار</small></button>
-  <button class="home-tile tile-analysis" onclick="openView('emerging')"><span class="tile-icon">🚀</span><b>رمزارزهای نوظهور</b><small>تازه‌فهرست‌شده‌ها، نرخ و نمودار</small></button>
  </div>
+ <button class="home-tile tile-emerging" onclick="openView('emerging')"><span class="tile-icon">🚀</span><span class="tile-copy"><b>رمزارزهای نوظهور</b><small>معرفی پروژه‌های تازه، قیمت و بررسی رشد و ریسک</small></span><span class="tile-arrow">›</span></button>
  <div class="home-foot"><span><i></i> سامانه پایش فعال</span><span>DEMO MODE · REAL TRADING OFF</span></div>
 </section>
 </div>
+
+<section class="inner-view view" id="view-emerging"><div class="view-head"><button class="back-home" onclick="openView('home')">⌂ خانه</button><div><b>🚀 رمزارزهای نوظهور</b><small>پروژه‌های داغ بازار، اطلاعات و تغییرات هفتگی</small></div></div>
+<section class="card"><div class="sectiontitle">🔥 فهرست پروژه‌های مورد توجه بازار</div><div class="emerging-note">فهرست از داده‌های ترند عمومی CoinGecko دریافت می‌شود. رتبه، ارزش بازار و تغییر قیمت برای بررسی اولیه است و به‌معنای تأیید یا توصیه خرید نیست.</div><div class="emerging-toolbar"><button class="primary" id="emergingRefresh">⟳ دریافت فهرست تازه</button><span class="label" id="emergingUpdated">در انتظار دریافت…</span></div><div class="muted" id="emergingStatus">برای دریافت رمزارزهای پرجست‌وجو، دکمه به‌روزرسانی را بزنید.</div><div class="emerging-list" id="emergingList"></div><div class="emerging-detail hidden" id="emergingDetail"><h3 id="emergingDetailTitle">جزئیات رمزارز</h3><div class="emerging-stats"><div><small>قیمت فعلی · USD</small><b id="emergingDetailPrice">—</b></div><div><small>تغییر ۲۴ ساعته</small><b id="emergingDetailChange">—</b></div><div><small>ارزش بازار</small><b id="emergingDetailCap">—</b></div><div><small>حجم معاملات ۲۴ ساعته</small><b id="emergingDetailVolume">—</b></div><div><small>رتبه بازار</small><b id="emergingDetailRank">—</b></div><div><small>بازه ۲۴ ساعته</small><b id="emergingDetailRange">—</b></div></div><canvas class="emerging-chart" id="emergingSparkline" width="700" height="180"></canvas><p id="emergingDescription">برای مشاهده توضیحات پروژه، داده تکمیلی دریافت می‌شود.</p><div class="emerging-toolbar"><button class="ghost" id="emergingOpenMarket">بازکردن نماد در بازار</button><button class="ghost" id="emergingCloseDetail">بستن جزئیات</button></div><div class="notice">⚠️ رمزارزهای نوظهور می‌توانند نقدشوندگی کم، نوسان شدید، قرارداد جعلی یا ریسک از دست‌رفتن کامل سرمایه داشته باشند. این بخش صرفاً اطلاعاتی است.</div></div></section>
+</section>
 <section class="inner-view view" id="view-market"><div class="view-head"><button class="back-home" onclick="openView('home')">⌂ خانه</button><div><b>🌐 بازارهای جهانی</b><small>قیمت لحظه‌ای و انتخاب نماد</small></div></div>
 <section class="card">
  <div class="sectiontitle"><span>💹 بازار و قیمت لحظه‌ای</span><span class="muted">بازار جهانی</span></div>
@@ -140,7 +157,7 @@ body{padding:0!important;background:radial-gradient(ellipse at 50% -12%,#174c9b 
 </section>
 </section>
 <section class="inner-view view" id="view-chart"><div class="view-head"><button class="back-home" onclick="openView('home')">⌂ خانه</button><div><b>📈 نمودار بازار</b><small>تاریخچه و بررسی روند قیمت</small></div></div>
-<section class="card" id="chartSection"><div class="charthead"><div class="sectiontitle">📊 نمودار زنده بازار</div><span class="label" id="chartLiveState">● آماده دریافت قیمت</span></div><div class="charttools"><select id="chartInterval"><option value="5s">۵ ثانیه</option><option value="30s">۳۰ ثانیه</option><option value="1m">۱ دقیقه</option><option value="5m" selected>۵ دقیقه</option><option value="15m">۱۵ دقیقه</option><option value="30m">۳۰ دقیقه</option><option value="1h">۱ ساعته</option><option value="4h">۴ ساعته</option><option value="1d">روزانه</option></select><button class="primary" id="refreshChart">⟳ دریافت تاریخچه</button></div><div class="chart-stage" id="chartStage"><canvas id="chart" width="1000" height="420"></canvas></div><div class="chart-zoom"><button type="button" id="chartOpenLarge" class="ghost">⛶ نمای بزرگ</button><button type="button" id="chartZoomIn">＋</button><button type="button" id="chartZoomOut">－</button><button type="button" id="chartReset">بازنشانی نما</button></div><label class="chart-expand-toggle"><input type="checkbox" id="chartExpandToggle"> بازکردن نمای توسعه‌یافته و پنل جزئیات در فضای پایین</label><div class="chart-help">کشیدن برای حرکت افقی · دکمه‌ها یا چرخ ماوس برای زوم · انتخاب هر کندل برای مشاهده OHLC و زمان دقیق</div><div class="muted" id="chartNote">تاریخچه از منابع عمومی بازار دریافت می‌شود.</div><div class="chart-detail hidden" id="chartDetail"><div class="sectiontitle">🔎 جزئیات کندل انتخاب‌شده</div><div class="chart-detail-grid"><div><small>زمان</small><b id="detailTime">—</b></div><div><small>بازشدن · Open</small><b id="detailOpen">—</b></div><div><small>بالاترین · High</small><b id="detailHigh">—</b></div><div><small>پایین‌ترین · Low</small><b id="detailLow">—</b></div><div><small>بسته‌شدن · Close</small><b id="detailClose">—</b></div><div><small>تغییر کندل</small><b id="detailChange">—</b></div></div></div></section>
+<section class="card" id="chartSection"><div class="charthead"><div class="sectiontitle">📊 نمودار زنده بازار</div><span class="label" id="chartLiveState">● آماده دریافت قیمت</span></div><div class="charttools"><select id="chartInterval"><option value="1m">۱ دقیقه</option><option value="5m" selected>۵ دقیقه</option><option value="15m">۱۵ دقیقه</option><option value="30m">۳۰ دقیقه</option><option value="1h">۱ ساعته</option><option value="4h">۴ ساعته</option><option value="1d">روزانه</option></select><button class="primary" id="refreshChart">⟳ دریافت تاریخچه</button></div><div class="chart-stage" id="chartStage"><canvas id="chart" width="1000" height="420"></canvas></div><div class="chart-zoom"><button type="button" id="chartOpenLarge" class="ghost">⛶ نمای بزرگ</button><button type="button" id="chartZoomIn">＋</button><button type="button" id="chartZoomOut">－</button><button type="button" id="chartReset">بازنشانی نما</button></div><label class="chart-expand-toggle"><input type="checkbox" id="chartExpandToggle"> بازکردن نمای توسعه‌یافته و پنل جزئیات در فضای پایین</label><div class="chart-help">کشیدن برای حرکت افقی · دکمه‌ها یا چرخ ماوس برای زوم · انتخاب هر کندل برای مشاهده OHLC و زمان دقیق</div><div class="muted" id="chartNote">تاریخچه از منابع عمومی بازار دریافت می‌شود.</div><div class="chart-detail hidden" id="chartDetail"><div class="sectiontitle">🔎 جزئیات کندل انتخاب‌شده</div><div class="chart-detail-grid"><div><small>زمان</small><b id="detailTime">—</b></div><div><small>بازشدن · Open</small><b id="detailOpen">—</b></div><div><small>بالاترین · High</small><b id="detailHigh">—</b></div><div><small>پایین‌ترین · Low</small><b id="detailLow">—</b></div><div><small>بسته‌شدن · Close</small><b id="detailClose">—</b></div><div><small>تغییر کندل</small><b id="detailChange">—</b></div></div></div></section>
 </section>
 <section class="inner-view view" id="view-history"><div class="view-head"><button class="back-home" onclick="openView('home')">⌂ خانه</button><div><b>📋 تاریخچه معاملات</b><small>سوابق معاملات آزمایشی</small></div></div>
 <section class="card" id="historyCard"><div class="sectiontitle">📒 تاریخچه معاملات آزمایشی</div><div id="history"></div><button class="ghost" style="width:100%;margin-top:8px" onclick="document.getElementById('historyCard').classList.add('hidden')">بستن</button></section>
@@ -148,33 +165,13 @@ body{padding:0!important;background:radial-gradient(ellipse at 50% -12%,#174c9b 
 <section class="inner-view view" id="view-account"><div class="view-head"><button class="back-home" onclick="openView('home')">⌂ خانه</button><div><b>💱 حساب و تبدیل ارز</b><small>ارزش حساب، تومان و ریال</small></div></div>
  <section class="card account-info"><div class="sectiontitle">💰 خلاصه حساب آزمایشی</div><p>موجودی و ارزش کل حساب در صفحه خانه به‌صورت زنده نمایش داده می‌شود.</p><div class="fxline"><span class="label">نرخ خودکار دلار آزاد · تومان</span><strong id="fxDisplayMirror">در حال دریافت…</strong></div><p class="muted">نرخ تبدیل از منبع بازار ایران دریافت می‌شود. مبالغ ریالی و تومانی تقریبی هستند.</p><button class="primary" onclick="openView('trade')">رفتن به بخش معامله آزمایشی</button></section>
 </section>
-<section class="inner-view view" id="view-emerging">
- <div class="view-head"><button class="back-home" onclick="openView('home')">⌂ خانه</button><div><b>🚀 رمزارزهای نوظهور</b><small>کشف رمزارزهای تازه‌فهرست‌شده و بررسی جزئیات</small></div></div>
- <section class="card">
-  <div class="sectiontitle"><span>🔎 رمزارزهای تازه‌فهرست‌شده</span><button class="primary" id="emRefresh">⟳ بروزرسانی</button></div>
-  <div class="muted">فهرست پویا از بازار نقدی Binance؛ رمزارزهایی که تاریخ فهرست‌شدن آن‌ها در ۱۸۰ روز اخیر ثبت شده است. نرخ، حجم و تغییرات از داده عمومی بازار دریافت می‌شود.</div>
-  <div class="row" style="margin-top:10px"><input id="emSearch" type="search" placeholder="جستجوی نام یا نماد…"><select id="emFilter"><option value="new">جدیدترین فهرست‌شده‌ها</option><option value="volume">بیشترین حجم ۲۴ ساعته</option><option value="change">بیشترین رشد</option><option value="drop">بیشترین افت</option></select></div>
-  <div class="status" id="emStatus">برای دریافت فهرست، بروزرسانی را بزنید.</div>
-  <div class="tablewrap"><table style="min-width:570px"><thead><tr><th>رمزارز</th><th>قیمت (USDT)</th><th>تغییر ۲۴ساعته</th><th>حجم ۲۴ساعته</th><th>بیت‌پین</th><th>تاریخ فهرست</th></tr></thead><tbody id="emRows"><tr><td colspan="6">در انتظار دریافت داده…</td></tr></tbody></table></div>
- </section>
- <section class="card">
-  <div class="sectiontitle"><span id="emTitle">جزئیات رمزارز انتخاب‌شده</span><span id="emExchange" class="muted">—</span></div>
-  <div class="marketgrid"><div><div class="price" id="emPrice">—</div><div class="muted" id="emDesc">یک رمزارز را از فهرست بالا انتخاب کنید.</div></div><div class="marketright"><div class="label">تغییر ۲۴ ساعته</div><strong id="emChange">—</strong><div class="metrics" style="grid-template-columns:1fr 1fr"><div class="metric"><span>بالاترین</span><b id="emHigh">—</b></div><div class="metric"><span>پایین‌ترین</span><b id="emLow">—</b></div></div></div></div>
-  <div class="metrics"><div class="metric"><span>حجم ۲۴ ساعته (USDT)</span><b id="emVolume">—</b></div><div class="metric"><span>تاریخ فهرست</span><b id="emListed">—</b></div><div class="metric"><span>جفت معاملاتی</span><b id="emPair">—</b></div></div>
-  <div class="charttools"><select id="emInterval"><option value="5m">۵ دقیقه</option><option value="15m">۱۵ دقیقه</option><option value="1h" selected>۱ ساعت</option><option value="4h">۴ ساعت</option><option value="1d">روزانه</option></select><button class="ghost" id="emChartRefresh">⟳ بروزرسانی نمودار</button></div>
-  <div class="chart-stage" style="height:230px"><canvas id="emChart" width="1000" height="420"></canvas></div>
-  <div class="muted" id="emChartNote">نمودار کندلی تاریخی از Binance.</div>
-  <div class="notice">توضیح پروژه فقط در صورت دریافت اطلاعات قابل‌اتکا نمایش داده می‌شود؛ داده‌های بازار به‌تنهایی کاربرد یا اعتبار پروژه را اثبات نمی‌کنند. این بخش توصیه خرید نیست و سفارش واقعی ثبت نمی‌کند.</div>
- </section>
-</section>
-
 <footer class="footer">📈 همراه تریدر · نسخه آزمایشی · معاملات واقعی غیرفعال هستند.</footer>
 </main>
 <script src="./agent.js"></script>
 <script>
 "use strict";
 const $=id=>document.getElementById(id);
-let currentPrice=null,currentHighRaw=null,currentLowRaw=null,positionMarkPrice=null,positionMarkSymbol="",prices=[],candles=[],currentSymbol="",requestBusy=false,requestToken=0,historyNeedsRefresh=true,positionQuoteBusy=false,chartPricePollTimer=null;
+let currentPrice=null,currentHighRaw=null,currentLowRaw=null,positionMarkPrice=null,positionMarkSymbol="",prices=[],candles=[],currentSymbol="",requestBusy=false,requestToken=0,historyNeedsRefresh=true,positionQuoteBusy=false;
 let usdTomanRate=null,usdRateUpdatedAt=null,usdRateSource="",usdRateBusy=false,usdJpyRate=null,usdJpyBusy=false,usdtUsdRate=null,usdtRateBusy=false,currentPriceUnit="USD",positionPriceUnit="USD",positionQuoteError="";
 const isCrypto=s=>s.endsWith("USDT");
 const fmt=n=>Number.isFinite(Number(n))?Number(n).toLocaleString("en-US",{maximumFractionDigits:8}):"—";
@@ -278,7 +275,7 @@ function drawChart(){
  ctx.fillStyle="#b5cce8";ctx.textAlign="center";ctx.textBaseline="top";const marks=Math.min(6,data.length);for(let j=0;j<marks;j++){const idx=marks===1?0:Math.round(j*(data.length-1)/(marks-1)),k=data[idx],x=left+(idx+.5)*step;ctx.strokeStyle="#294967";ctx.beginPath();ctx.moveTo(x,top+plotH);ctx.lineTo(x,top+plotH+5*dpr);ctx.stroke();const dt=new Date(k.time||Date.now()),label=(dt.getMonth()+1)+"/"+dt.getDate()+" "+String(dt.getHours()).padStart(2,"0")+":"+String(dt.getMinutes()).padStart(2,"0");ctx.fillText(label,x,h-34*dpr)}
  ctx.textAlign="left";ctx.fillStyle="#8daed4";ctx.fillText("قیمت",left+2*dpr,5*dpr);ctx.fillText("زمان",left+2*dpr,h-15*dpr);$("chartLiveState").textContent=currentPrice>0?"● قیمت جاری: "+fmt(currentPrice):"● در انتظار قیمت";
 }
-function updateLiveCandle(price){if(!(price>0))return;const interval=$("chartInterval")?.value||"5m",ms=({"5s":5000,"30s":30000,"1m":60000,"5m":300000,"15m":900000,"30m":1800000,"1h":3600000,"4h":14400000,"1d":86400000})[interval]||300000,now=Date.now(),bucket=Math.floor(now/ms)*ms,last=candles[candles.length-1];if(!last||last.time<bucket){candles.push({time:bucket,open:price,high:price,low:price,close:price});if(candles.length>2000)candles.shift()}else{last.high=Math.max(last.high,price);last.low=Math.min(last.low,price);last.close=price}drawChart()}
+function updateLiveCandle(price){if(!(price>0))return;const interval=$("chartInterval")?.value||"5m",ms=({"1m":60000,"5m":300000,"15m":900000,"30m":1800000,"1h":3600000,"4h":14400000,"1d":86400000})[interval]||300000,now=Date.now(),bucket=Math.floor(now/ms)*ms,last=candles[candles.length-1];if(!last||last.time<bucket){candles.push({time:bucket,open:price,high:price,low:price,close:price});if(candles.length>2000)candles.shift()}else{last.high=Math.max(last.high,price);last.low=Math.min(last.low,price);last.close=price}drawChart()}
 function setupChartControls(){
  const stage=$("chartStage"),section=$("chartSection"),toggle=$("chartExpandToggle"),openBtn=$("chartOpenLarge");
  const clampView=()=>{const n=chartVisible().length,visible=Math.max(8,Math.floor(n/chartZoom));chartOffset=Math.max(0,Math.min(Math.max(0,n-visible),chartOffset))};
@@ -363,7 +360,7 @@ async function getCryptoPrice(s){
  throw Error("همه منابع قیمت ناموفق بودند: "+errors.join(" | "))
 }
 async function loadCryptoHistory(s){
- candles=[];const interval=$("chartInterval").value;if(interval==="5s"||interval==="30s"){prices=[];return []}const apiInterval=(["1m","5m","15m","30m","1h","4h","1d"].includes(interval)?interval:"1d"),limit=apiInterval==="1d"?365:1000,stable=Number.isFinite(usdtUsdRate)&&usdtUsdRate>0?usdtUsdRate:1;
+ candles=[];const interval=$("chartInterval").value,apiInterval=(["1m","5m","15m","30m","1h","4h","1d"].includes(interval)?interval:"1d"),limit=apiInterval==="1d"?365:1000,stable=Number.isFinite(usdtUsdRate)&&usdtUsdRate>0?usdtUsdRate:1;
  for(const base of ["https://data-api.binance.vision","https://api.binance.com","https://api1.binance.com"]){try{
   const rows=await fetchJson(base+"/api/v3/klines?symbol="+encodeURIComponent(s)+"&interval="+apiInterval+"&limit="+limit);
   candles=rows.map(x=>({time:+x[0],open:+x[1]*stable,high:+x[2]*stable,low:+x[3]*stable,close:+x[4]*stable})).filter(k=>[k.open,k.high,k.low,k.close].every(v=>v>0&&Number.isFinite(v)));if(candles.length)return candles.map(k=>k.close)
@@ -378,7 +375,6 @@ async function loadCryptoHistory(s){
 }
 async function loadBiQuoteHistory(s){
  const interval=$("chartInterval").value||"5m";
- if(interval==="5s"||interval==="30s"){candles=[];prices=[];return []}
  const allowed=["1m","5m","15m","30m","1h","4h","1d"];
  const tf=allowed.includes(interval)?interval:"5m";
  const url="https://biquote.io/api/"+encodeURIComponent(s)+"/ohlc?interval="+encodeURIComponent(tf)+"&limit=500";
@@ -446,24 +442,11 @@ function closePosition(){
 }
 $("refresh").addEventListener("click",getPrice);$("buy").addEventListener("click",()=>trade("BUY"));$("sell").addEventListener("click",()=>trade("SELL"));$("closePosition").addEventListener("click",closePosition);
 $("symbol").addEventListener("change",()=>{requestToken++;requestBusy=false;currentPrice=null;currentHighRaw=null;currentLowRaw=null;prices=[];candles=[];currentSymbol="";historyNeedsRefresh=true;$("price").textContent="— ریال";$("price").classList.remove("trend-up","trend-down","trend-flat");$("priceRaw").textContent="قیمت مرجع: —";$("priceRaw").classList.remove("trend-up","trend-down","trend-flat");$("priceMeta").textContent="در حال دریافت قیمت نماد جدید…";$("change").textContent=$("high").textContent=$("low").textContent="—";$("signal").textContent="WAIT · صبر";$("signal").className="wait";$("confidence").textContent="—";$("reason").textContent="در انتظار داده معتبر نماد جدید…";$("ema9").textContent=$("ema21").textContent=$("rsi").textContent="—";drawChart();renderPosition();getPrice();refreshOpenPositionQuote()});
-$("refreshChart").addEventListener("click",()=>{historyNeedsRefresh=true;chartZoom=1;chartOffset=0;getPrice()});$("chartInterval").addEventListener("change",()=>{historyNeedsRefresh=true;chartZoom=2.2;chartOffset=0;chartSelected=-1;candles=[];prices=[];$("chartDetail").classList.add("hidden");restartChartPricePolling();getPrice()});setupChartControls();window.addEventListener("resize",()=>requestAnimationFrame(drawChart));
-function chartPollInterval(){
- const tf=$("chartInterval")?.value||"5m";
- return ({"5s":5000,"30s":30000,"1m":60000,"5m":30000,"15m":30000,"30m":30000,"1h":30000,"4h":30000,"1d":30000})[tf]||30000;
-}
-function restartChartPricePolling(){
- if(chartPricePollTimer)clearInterval(chartPricePollTimer);
- chartPricePollTimer=setInterval(()=>{
-  if(document.visibilityState!=="hidden"){
-   getPrice();
-   refreshOpenPositionQuote();
-  }
- },chartPollInterval());
-}
+$("refreshChart").addEventListener("click",()=>{historyNeedsRefresh=true;chartZoom=1;chartOffset=0;getPrice()});$("chartInterval").addEventListener("change",()=>{historyNeedsRefresh=true;chartZoom=2.2;chartOffset=0;chartSelected=-1;candles=[];prices=[];$("chartDetail").classList.add("hidden");getPrice()});setupChartControls();window.addEventListener("resize",()=>requestAnimationFrame(drawChart));
 window.addEventListener("load",()=>{
  if(!window.HamrahTraderAgent){setStatus("فایل agent.js بارگذاری نشده است؛ موتور معاملات آزمایشی فعال نیست.");$("buy").disabled=$("sell").disabled=$("closePosition").disabled=true;return}
  window.HamrahTraderAgent.start();updateBalance();refreshUsdIrrRate();refreshUsdJpyRate();refreshUsdtUsdRate();getPrice();refreshOpenPositionQuote();
- restartChartPricePolling();
+ setInterval(()=>{if(document.visibilityState!=="hidden"){getPrice();refreshOpenPositionQuote()}},30000);
  setInterval(()=>{if(document.visibilityState!=="hidden"){refreshUsdIrrRate();refreshUsdJpyRate();refreshUsdtUsdRate()}},300000)
 });
 if("serviceWorker"in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(()=>{}));
@@ -472,14 +455,33 @@ if("serviceWorker"in navigator)window.addEventListener("load",()=>navigator.serv
 (function(){const fx=document.getElementById('fx'),fxDisplay=document.getElementById('fxDisplay'),fxMirror=document.getElementById('fxDisplayMirror');const sync=()=>{if(fx&&fxDisplay){fxDisplay.textContent=fx.value||'در حال دریافت…';const n=Number(String(fx.value||'').replace(/,/g,''));if(Number.isFinite(n)&&n>0){setRateTrend(fxDisplay,'usd-toman',n);if(fxMirror){fxMirror.textContent=fx.value;setRateTrend(fxMirror,'usd-toman-mirror',n)}}}};sync();setInterval(sync,1500);const bal=document.getElementById('balanceRial'),tom=document.getElementById('balanceIrr'),rm=document.getElementById('balanceRialMirror'),tm=document.getElementById('balanceTomanMirror');const mirror=()=>{if(rm&&bal)rm.textContent=bal.textContent;if(tm&&tom)tm.textContent=tom.textContent};mirror();setInterval(mirror,1500)})();
 </script>
 
+
+<script>
+/* Emerging assets: live public market discovery, details and 7-day sparkline */
+(function(){
+ const $e=id=>document.getElementById(id);let emergingItems=[],selectedEmerging=null,emergingBusy=false,emergingCacheAt=0;
+ const money=n=>Number.isFinite(Number(n))?new Intl.NumberFormat('en-US',{notation:Number(n)>=1e9?'compact':'standard',maximumFractionDigits:2}).format(Number(n)):'—';
+ const safeText=(el,v)=>{if(el)el.textContent=v==null?'—':String(v)};
+ async function emergingFetch(url){const r=await fetch(url,{cache:'no-store',headers:{Accept:'application/json'}});if(!r.ok)throw Error('HTTP '+r.status);return r.json()}
+ function renderEmerging(){const root=$e('emergingList');if(!root)return;root.replaceChildren();if(!emergingItems.length)return;emergingItems.forEach((c,i)=>{const row=document.createElement('button');row.type='button';row.className='emerging-item';const rank=document.createElement('span');rank.className='emerging-rank';rank.textContent=c.market_cap_rank?'#'+c.market_cap_rank:String(i+1);const name=document.createElement('span');name.className='emerging-name';const b=document.createElement('b');b.textContent=c.name+' ('+String(c.symbol||'').toUpperCase()+')';const sm=document.createElement('small');sm.textContent='ارزش بازار: $'+money(c.market_cap);name.append(b,sm);const price=document.createElement('span');price.className='emerging-price';const pb=document.createElement('b');pb.textContent='$'+money(c.current_price);const ch=document.createElement('small');const change=Number(c.price_change_percentage_24h);ch.textContent=Number.isFinite(change)?(change>0?'+':'')+change.toFixed(2)+'% · ۲۴ ساعت':'تغییر ۲۴ساعته —';ch.className=Number.isFinite(change)?(change>=0?'emerging-up':'emerging-down'):'';price.append(pb,ch);row.append(rank,name,price);row.addEventListener('click',()=>showEmergingDetail(c));root.append(row)})}
+ async function loadEmerging(force){if(emergingBusy)return;if(!force&&emergingItems.length&&Date.now()-emergingCacheAt<300000){renderEmerging();return}emergingBusy=true;safeText($e('emergingStatus'),'در حال دریافت فهرست ترند بازار…');$e('emergingRefresh').disabled=true;try{const trending=await emergingFetch('https://api.coingecko.com/api/v3/search/trending');const coins=(trending.coins||[]).map(x=>x.item).filter(x=>x&&x.id).slice(0,12);if(!coins.length)throw Error('فهرست ترند خالی است');const ids=coins.map(x=>x.id).join(',');const markets=await emergingFetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids='+encodeURIComponent(ids)+'&order=market_cap_desc&per_page=20&page=1&sparkline=true&price_change_percentage=24h');const byId=new Map(markets.map(x=>[x.id,x]));emergingItems=coins.map(x=>byId.get(x.id)).filter(Boolean);if(!emergingItems.length)throw Error('اطلاعات قیمت این پروژه‌ها در دسترس نیست');emergingCacheAt=Date.now();renderEmerging();safeText($e('emergingStatus'),'اطلاعات زنده از CoinGecko · '+emergingItems.length+' رمزارز');safeText($e('emergingUpdated'),'به‌روزرسانی: '+new Date().toLocaleTimeString('fa-IR'))}catch(err){safeText($e('emergingStatus'),'دریافت اطلاعات ناموفق بود: '+(err.message||'خطای شبکه')+' · اتصال اینترنت یا محدودیت سرویس را بررسی کنید.')}finally{emergingBusy=false;$e('emergingRefresh').disabled=false}}
+ function drawEmergingSpark(data){const canvas=$e('emergingSparkline'),ctx=canvas&&canvas.getContext('2d');if(!ctx)return;const w=canvas.width,h=canvas.height;ctx.clearRect(0,0,w,h);ctx.strokeStyle='#1c416d';ctx.lineWidth=1;for(let y=30;y<h;y+=40){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y);ctx.stroke()}const vals=(data||[]).filter(Number.isFinite);if(vals.length<2)return;const min=Math.min(...vals),max=Math.max(...vals),range=max-min||1;ctx.beginPath();vals.forEach((v,i)=>{const x=i/(vals.length-1)*w,y=h-14-(v-min)/range*(h-28);if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y)});ctx.strokeStyle=vals.at(-1)>=vals[0]?'#00e89a':'#ff6278';ctx.lineWidth=4;ctx.shadowBlur=10;ctx.shadowColor=ctx.strokeStyle;ctx.stroke();ctx.shadowBlur=0}
+ async function showEmergingDetail(c){selectedEmerging=c;$e('emergingDetail').classList.remove('hidden');safeText($e('emergingDetailTitle'),c.name+' ('+String(c.symbol||'').toUpperCase()+')');safeText($e('emergingDetailPrice'),'$'+money(c.current_price));const ch=Number(c.price_change_percentage_24h);safeText($e('emergingDetailChange'),Number.isFinite(ch)?(ch>0?'+':'')+ch.toFixed(2)+'%':'—');safeText($e('emergingDetailCap'),'$'+money(c.market_cap));safeText($e('emergingDetailVolume'),'$'+money(c.total_volume));safeText($e('emergingDetailRank'),c.market_cap_rank?'#'+c.market_cap_rank:'نامشخص');safeText($e('emergingDetailRange'),'$'+money(c.low_24h)+' تا $'+money(c.high_24h));drawEmergingSpark(c.sparkline_in_7d&&c.sparkline_in_7d.price);safeText($e('emergingDescription'),'در حال دریافت معرفی پروژه…');try{const d=await emergingFetch('https://api.coingecko.com/api/v3/coins/'+encodeURIComponent(c.id)+'?localization=false&tickers=false&market_data=false&community_data=false&developer_data=false&sparkline=false');const desc=(d.description&& (d.description.fa||d.description.en)||'').replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim();safeText($e('emergingDescription'),desc?desc.slice(0,900)+(desc.length>900?'…':''):'توضیح رسمی قابل‌نمایش برای این پروژه در منبع دریافت نشد.')}catch(e){safeText($e('emergingDescription'),'توضیحات تکمیلی در حال حاضر از منبع عمومی دریافت نشد.')} }
+ function openSelectedMarket(){if(!selectedEmerging)return;const sym=String(selectedEmerging.symbol||'').toUpperCase().replace(/[^A-Z0-9]/g,'');if(!sym){safeText($e('emergingStatus'),'نماد معاملاتی معتبر برای این پروژه موجود نیست.');return}const pair=sym+'USDT',select=$e('symbol');if(typeof IDS!=='undefined')IDS[pair]=selectedEmerging.id;let option=Array.from(select.options).find(o=>o.value===pair);if(!option){option=document.createElement('option');option.value=pair;option.textContent=sym+' / USDT · پروژه نوظهور';select.append(option)}window.openView('market');select.value=pair;select.dispatchEvent(new Event('change',{bubbles:true}));safeText($e('status'),'در حال بررسی '+sym+'/USDT؛ اگر این جفت‌ارز در منبع قیمت پشتیبانی نشود، قیمت نمایش داده نمی‌شود و معامله دمو قابل ثبت نخواهد بود.')}
+ $e('emergingRefresh').addEventListener('click',()=>loadEmerging(true));$e('emergingCloseDetail').addEventListener('click',()=>$e('emergingDetail').classList.add('hidden'));$e('emergingOpenMarket').addEventListener('click',openSelectedMarket);
+ window.loadEmergingAssets=loadEmerging;
+})();
+</script>
+
 <script>
 (function(){
  window.openView=function(name){
-  const valid=['home','market','analysis','trade','chart','history','account'];
+  const valid=['home','market','analysis','trade','chart','history','account','emerging'];
   if(!valid.includes(name))name='home';
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
   const target=document.getElementById('view-'+name);if(target)target.classList.add('active');
   if(name==='history'&&typeof renderHistory==='function')renderHistory();
+  if(name==='emerging'&&typeof window.loadEmergingAssets==='function')window.loadEmergingAssets(false);
   if(name==='account'){const fx=document.getElementById('fx'),out=document.getElementById('fxDisplayMirror');if(fx&&out)out.textContent=fx.value||'در حال دریافت…';}
   if(name==='chart'&&typeof drawChart==='function')setTimeout(()=>drawChart(),60);
  };
@@ -487,27 +489,4 @@ if("serviceWorker"in navigator)window.addEventListener("load",()=>navigator.serv
  oldSync();setInterval(oldSync,1500);
 })();
 </script>
-<script>
-/* Emerging crypto discovery: public market data only; no keys and no order permissions. */
-(function(){
-"use strict";
-const $e=id=>document.getElementById(id),api="https://api.binance.com";
-let assets=[],selected=null,busy=false,requestSeq=0;
-const num=n=>Number.isFinite(Number(n))?Number(n).toLocaleString("en-US",{maximumFractionDigits:10}):"—";
-const listed=n=>n?new Date(n).toLocaleDateString("fa-IR"):"ثبت نشده";
-async function get(url){const c=new AbortController(),t=setTimeout(()=>c.abort(),14000);try{const r=await fetch(url,{cache:"no-store",signal:c.signal,headers:{Accept:"application/json"}});if(!r.ok)throw Error("HTTP "+r.status);return await r.json()}finally{clearTimeout(t)}}
-function status(t){$e("emStatus").textContent=t}
-function visible(){const q=($e("emSearch").value||"").trim().toLowerCase(),mode=$e("emFilter").value;let a=assets.filter(x=>!q||(x.base+" "+x.symbol).toLowerCase().includes(q));if(mode==="volume")a.sort((x,y)=>y.volume-x.volume);else if(mode==="change")a.sort((x,y)=>y.change-x.change);else if(mode==="drop")a.sort((x,y)=>x.change-y.change);else a.sort((x,y)=>y.listed-x.listed);return a}
-function render(){const a=visible(),body=$e("emRows");if(!a.length){body.innerHTML='<tr><td colspan="6">موردی با این فیلتر پیدا نشد.</td></tr>';return}body.innerHTML=a.slice(0,250).map(x=>'<tr><td><button class="ghost" style="padding:5px 7px" data-em-pair="'+x.symbol+'">'+x.base+' / USDT</button></td><td dir="ltr">'+num(x.price)+'</td><td dir="ltr" style="color:'+(x.change>=0?'#00e78c':'#ff526f')+'">'+(x.change>=0?'+':'')+num(x.change)+'%</td><td dir="ltr">'+num(x.volume)+'</td><td>'+listed(x.listed)+'</td></tr>').join("");body.querySelectorAll("[data-em-pair]").forEach(b=>b.addEventListener("click",()=>choose(b.dataset.emPair)))}
-async function load(){if(busy)return;busy=true;const seq=++requestSeq;status("در حال دریافت فهرست نمادها و قیمت‌های بازار Binance…");try{const [info,tickers]=await Promise.all([get(api+"/api/v3/exchangeInfo"),get(api+"/api/v3/ticker/24hr")]);if(seq!==requestSeq)return;let bitpinRows=null;for(const host of ["https://api.bitpin.org","https://api.bitpin.ir","https://api.bitpin.market"]){try{bitpinRows=unwrapRows(await get(host+"/api/v1/mkt/tickers/"));if(bitpinRows.length)break}catch(e){}}const bitpinSet=new Set((bitpinRows||[]).map(r=>normPair(r.symbol||r.market||r.code||r.pair)));const cutoff=Date.now()-180*86400000,active=new Map(info.symbols.filter(x=>x.status==="TRADING"&&x.quoteAsset==="USDT"&&x.isSpotTradingAllowed!==false&&Number(x.onboardDate)>cutoff).map(x=>[x.symbol,x]));assets=tickers.filter(t=>active.has(t.symbol)).map(t=>{const base=active.get(t.symbol).baseAsset;return{symbol:t.symbol,base,listed:+active.get(t.symbol).onboardDate,price:+t.lastPrice,change:+t.priceChangePercent,volume:+t.quoteVolume,high:+t.highPrice,low:+t.lowPrice,bitpin:bitpinRows?bitpinSet.has(normPair(base+"_USDT"))||bitpinSet.has(normPair(base+"_IRT")):null}});render();status(assets.length+" رمزارز با تاریخ فهرست‌شدن در ۱۸۰ روز اخیر پیدا شد · منبع: Binance Spot · "+new Date().toLocaleTimeString("fa-IR"));if(!selected&&assets.length)choose(visible()[0].symbol)}catch(e){status("دریافت داده ناموفق بود: "+e.message+"؛ ممکن است دسترسی شبکه به API محدود باشد.")}finally{busy=false}}
-async function choose(pair){selected=assets.find(x=>x.symbol===pair);if(!selected)return;const x=selected;$e("emTitle").textContent=x.base+" · "+x.symbol;$e("emExchange").textContent="Binance Spot · بیت‌پین: "+(x.bitpin===true?"دارای بازار":x.bitpin===false?"فعلاً فهرست نشده":"وضعیت نامشخص");$e("emPrice").textContent=num(x.price)+" USDT";$e("emChange").textContent=(x.change>=0?"+":"")+num(x.change)+"%";$e("emChange").style.color=x.change>=0?"#00e78c":"#ff526f";$e("emHigh").textContent=num(x.high);$e("emLow").textContent=num(x.low);$e("emVolume").textContent=num(x.volume);$e("emListed").textContent=listed(x.listed);$e("emPair").textContent=x.symbol;$e("emDesc").textContent="این نماد در بازار نقدی Binance فعال است. در حال بررسی توضیحات پروژه از CoinGecko…";await Promise.all([projectDescription(x.base),chart()])}
-async function projectDescription(symbol){const box=$e("emDesc");try{const found=await get("https://api.coingecko.com/api/v3/search?query="+encodeURIComponent(symbol));const candidates=(found.coins||[]).filter(c=>String(c.symbol).toUpperCase()===symbol.toUpperCase());if(!candidates.length)throw Error("پروژه در فهرست CoinGecko پیدا نشد");candidates.sort((a,b)=>(a.market_cap_rank||999999)-(b.market_cap_rank||999999));const coin=await get("https://api.coingecko.com/api/v3/coins/"+encodeURIComponent(candidates[0].id)+"?localization=false&tickers=false&market_data=false&community_data=false&developer_data=false&sparkline=false");const desc=String(coin.description?.en||"").replace(/<[^>]*>/g," ").replace(/\s+/g," ").trim();const categories=(coin.categories||[]).filter(Boolean).slice(0,4).join("، ");box.textContent=(desc?desc.slice(0,950):"شرح متنی پروژه در منبع موجود نبود.")+(categories?" | دسته‌بندی: "+categories:"")+(coin.links?.homepage?.[0]?" | وب‌سایت: "+coin.links.homepage[0]:"");}catch(e){box.textContent="این نماد در Binance فهرست شده است ("+listed(selected?.listed)+"). توضیح قابل‌اتکای پروژه از CoinGecko دریافت نشد؛ از ساختن توضیح حدسی خودداری شد."}}
-function draw(data){const c=$e("emChart"),r=c.getBoundingClientRect();if(r.width<30)return;const d=Math.min(devicePixelRatio||1,2),w=Math.floor(r.width*d),h=Math.floor(r.height*d);c.width=w;c.height=h;const g=c.getContext("2d");g.fillStyle="#06142a";g.fillRect(0,0,w,h);if(!data.length){g.fillStyle="#b5cce8";g.font=14*d+"px Tahoma";g.fillText("نمودار در دسترس نیست",20*d,35*d);return}const l=12*d,rr=92*d,t=15*d,b=30*d,pw=w-l-rr,ph=h-t-b;let lo=Math.min(...data.map(k=>k.l)),hi=Math.max(...data.map(k=>k.h));if(!(hi>lo)){lo*=.999;hi*=1.001}const pad=(hi-lo)*.06;lo-=pad;hi+=pad;const y=v=>t+(hi-v)/(hi-lo)*ph,step=pw/data.length,bw=Math.max(2*d,step*.58);for(let i=0;i<=4;i++){const yy=t+ph*i/4;g.strokeStyle="#294765";g.beginPath();g.moveTo(l,yy);g.lineTo(l+pw,yy);g.stroke();g.fillStyle="#c3d8f0";g.font=9*d+"px Tahoma";g.fillText(num(hi-(hi-lo)*i/4),l+pw+5*d,yy+3*d)}data.forEach((k,i)=>{const xx=l+(i+.5)*step,col=k.c>=k.o?"#00df98":"#ff526f";g.strokeStyle=col;g.fillStyle=col;g.beginPath();g.moveTo(xx,y(k.h));g.lineTo(xx,y(k.l));g.stroke();g.fillRect(xx-bw/2,y(Math.max(k.o,k.c)),bw,Math.max(2*d,y(Math.min(k.o,k.c))-y(Math.max(k.o,k.c))))});g.fillStyle="#b5cce8";g.font=9*d+"px Tahoma";g.textAlign="center";[0,Math.floor(data.length/2),data.length-1].forEach(i=>{if(data[i])g.fillText(new Date(data[i].t).toLocaleDateString("fa-IR"),l+(i+.5)*step,h-15*d)})}
-async function chart(){if(!selected)return;const pair=selected.symbol,tf=$e("emInterval").value;$e("emChartNote").textContent="در حال دریافت کندل‌های "+pair+"…";try{const a=await get(api+"/api/v3/klines?symbol="+encodeURIComponent(pair)+"&interval="+encodeURIComponent(tf)+"&limit=120");draw(a.map(k=>({t:+k[0],o:+k[1],h:+k[2],l:+k[3],c:+k[4]})));$e("emChartNote").textContent="۱۲۰ کندل "+tf+" · منبع: Binance Spot · مظنه: USDT"}catch(e){draw([]);$e("emChartNote").textContent="دریافت نمودار ناموفق بود: "+e.message}}
-$e("emRefresh").addEventListener("click",load);$e("emSearch").addEventListener("input",render);$e("emFilter").addEventListener("change",render);$e("emChartRefresh").addEventListener("click",chart);$e("emInterval").addEventListener("change",chart);
-const prior=window.openView;window.openView=function(name){if(name==="emerging"){document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"));$e("view-emerging").classList.add("active");if(!assets.length)load();else if(selected)chart();return}if(typeof prior==="function")prior(name)};
-window.addEventListener("resize",()=>{if($e("view-emerging").classList.contains("active")&&selected)chart()});
-})();
-</script>
-
 </body></html>
