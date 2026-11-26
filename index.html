@@ -238,56 +238,175 @@ async function fetchJson(url){
  if(!r.ok)throw new Error("HTTP "+r.status);const d=await r.json();if(d&&d.code&&d.msg)throw new Error(d.msg);return d
  }finally{clearTimeout(timer)}
 }
-async function refreshUsdJpyRate(){if(usdJpyBusy)return;usdJpyBusy=true;try{const d=await getForexPrice("USDJPY"),rate=Number(d.price);if(!(rate>0))throw Error("USD/JPY نامعتبر است");usdJpyRate=rate}catch(e){}finally{usdJpyBusy=false}}
-async function refreshUsdtUsdRate(){if(usdtRateBusy)return;usdtRateBusy=true;try{const d=await fetchJson("https://api.coincap.io/v2/assets/tether"),rate=Number(d&&d.data&&d.data.priceUsd);if(!(rate>0)||rate<.95||rate>1.05)throw Error("USDT/USD نامعتبر است");usdtUsdRate=rate}catch(e){usdtUsdRate=1}finally{usdtRateBusy=false}}
+
 async function refreshUsdIrrRate(){
  if(usdRateBusy)return;
  usdRateBusy=true;
- try{
-  const url="https://raw.githubusercontent.com/iran-market/iran-market.github.io/main/data/popular.json?ts="+Date.now();
-  const response=await fetch(url,{cache:"no-store",headers:{"Accept":"application/json"}});
-  if(!response.ok)throw Error("HTTP "+response.status);
-  const payload=await response.json();
-  const item=(payload.data||[]).find(x=>x.symbol==="USD_IRR_FREE");
-  const meta=payload.meta||{};
-  const rawPrice=Number(item&&item.price);
-  const sourceUnit=String((item&&item.unit)||meta.unit||"toman").trim().toLowerCase();
-  // همه محاسبات داخلی با تومان/دلار انجام می‌شوند؛ اگر منبع ریال بدهد، یک‌دهم می‌کنیم.
-  const rialUnits=["irr","rial","rials","ریال","ریالی"];
-  const tomanUnits=["toman","tomans","irt","تومان","تومانی"];
-  const price=rialUnits.includes(sourceUnit)?rawPrice/10:rawPrice;
-  // checked_at/meta.updated_at نشان‌دهنده زمان بررسی منبع است؛ timestamp ممکن است قدیمی‌تر باشد.
-  const rawStamp=(item&&item.checked_at)||meta.updated_at||(item&&item.timestamp);
-  const stamp=typeof rawStamp==="number"?(rawStamp<1e12?rawStamp*1000:rawStamp):Date.parse(rawStamp);
-  const age=Number.isFinite(stamp)?Date.now()-stamp:Infinity;
-  if(!(price>0)||!Number.isFinite(stamp)||age < -5*60*1000||age>3*60*60*1000||item.stale===true||meta.stale===true||(!rialUnits.includes(sourceUnit)&&!tomanUnits.includes(sourceUnit)))
-   throw Error("نرخ دلار معتبر یا تازه نیست");
 
-  usdTomanRate=price;
-  usdRateUpdatedAt=new Date(stamp);
-  usdRateSource=String(item.source||meta.source||"Iran Market Data");
-  $("fx").value=fmt(price);
-  $("fxStatus").textContent="هر دلار: "+fmt(price)+" تومان · "+fmt(price*10)+" ریال | "+usdRateUpdatedAt.toLocaleTimeString("fa-IR")+" | منبع: "+usdRateSource;
+ try{
+  let rateData=null;
+  let errors=[];
+
+  // منبع اول: نرخ‌آرا، API رسمی نرخ بازار آزاد
+  try{
+   const payload=await fetchJson(
+    "https://nerkhara.com/api/v1/latest/usd.json?ts="+Date.now()
+   );
+
+   const item=payload.item||payload;
+   const price=Number(item.price);
+   const unit=String(item.unit||"").trim().toUpperCase();
+   const stamp=Date.parse(item.updated_utc||payload.generated_utc||"");
+   const age=Date.now()-stamp;
+
+   if(
+    !(price>0)||
+    unit!=="IRT"||
+    !Number.isFinite(stamp)||
+    age < -300000||
+    age>45*60*1000||
+    item.stale===true
+   )throw Error("نرخ‌آرا نامعتبر یا قدیمی است");
+
+   rateData={
+    price:price,
+    stamp:stamp,
+    source:"NerkhAra · بازار آزاد"
+   };
+  }catch(e){
+   errors.push(e);
+  }
+
+  // منبع دوم: Iran Market
+  if(!rateData){
+   try{
+    const payload=await fetchJson(
+     "https://raw.githubusercontent.com/iran-market/iran-market.github.io/main/data/popular.json?ts="+Date.now()
+    );
+
+    const item=(payload.data||[]).find(
+     x=>x.symbol==="USD_IRR_FREE"
+    );
+
+    if(!item)throw Error("نماد دلار پیدا نشد");
+
+    const price=Number(item.price);
+    const unit=String(item.currency||item.unit||"").toUpperCase();
+    const stamp=Date.parse(
+     item.checked_at||
+     payload.meta?.published_at||
+     item.timestamp_tehran||
+     item.timestamp||
+     ""
+    );
+
+    const age=Date.now()-stamp;
+
+    if(
+     !(price>0)||
+     !["IRT","IRR"].includes(unit)||
+     !Number.isFinite(stamp)||
+     age < -300000||
+     age>6*60*60*1000||
+     item.stale===true
+    )throw Error("نرخ منبع دوم معتبر نیست");
+
+    rateData={
+     price:unit==="IRR"?price/10:price,
+     stamp:stamp,
+     source:"Iran Market"
+    };
+   }catch(e){
+    errors.push(e);
+   }
+  }
+
+  if(!rateData){
+   throw errors[errors.length-1]||Error("تمام منابع قطع هستند");
+  }
+
+  // ذخیره نرخ داخلی بر اساس تومان
+  usdTomanRate=rateData.price;
+  usdRateUpdatedAt=new Date(rateData.stamp);
+  usdRateSource=rateData.source;
+
+  $("fx").value=fmt(usdTomanRate);
+
+  $("fxStatus").textContent=
+   "هر دلار: "+fmt(usdTomanRate)+
+   " تومان · "+fmt(usdTomanRate*10)+
+   " ریال | "+
+   usdRateUpdatedAt.toLocaleTimeString("fa-IR")+
+   " | منبع: "+usdRateSource;
+
   $("fxStatus").style.color="var(--green)";
 
+  // به‌روزرسانی حساب دمو
   updateBalance();
   renderPosition();
+
+  // به‌روزرسانی قیمت و سقف و کف نمودار
   if(currentPrice>0&&currentSymbol===$("symbol").value){
-   $("price").textContent=formatRial(priceInRial(currentSymbol,currentPrice,currentPriceUnit));setRateTrend($("price"),"market-rial-"+currentSymbol,priceInRial(currentSymbol,currentPrice,currentPriceUnit));
-   if(currentHighRaw>0)$("high").textContent=formatRial(priceInRial(currentSymbol,currentHighRaw,currentPriceUnit));
-   if(currentLowRaw>0)$("low").textContent=formatRial(priceInRial(currentSymbol,currentLowRaw,currentPriceUnit));
-   $("priceMeta").textContent=$("priceMeta").textContent.replace(/(?:در انتظار نرخ تبدیل دلار|نرخ تبدیل دلار:.*)$/,"نرخ تبدیل دلار: "+fmt(price*10)+" ریال");
+
+   const rialPrice=priceInRial(
+    currentSymbol,currentPrice,currentPriceUnit
+   );
+
+   $("price").textContent=formatRial(rialPrice);
+
+   setRateTrend(
+    $("price"),
+    "market-rial-"+currentSymbol,
+    rialPrice
+   );
+
+   if(currentHighRaw>0){
+    $("high").textContent=formatRial(
+     priceInRial(currentSymbol,currentHighRaw,currentPriceUnit)
+    );
+   }
+
+   if(currentLowRaw>0){
+    $("low").textContent=formatRial(
+     priceInRial(currentSymbol,currentLowRaw,currentPriceUnit)
+    );
+   }
+
+   $("priceMeta").textContent=
+    $("priceMeta").textContent.replace(
+     /(?:در انتظار نرخ تبدیل دلار|نرخ تبدیل دلار:.*)$/,
+     "نرخ تبدیل دلار: "+fmt(usdTomanRate*10)+" ریال"
+    );
   }
-  if(!$("historyCard").classList.contains("hidden"))renderHistory();
+
+  // به‌روزرسانی تاریخچه
+  if(!$("historyCard").classList.contains("hidden")){
+   renderHistory();
+  }
+
  }catch(e){
-  $("fxStatus").textContent=usdTomanRate
-   ?"اختلال در دریافت نرخ جدید؛ آخرین نرخ معتبر حفظ شده: "+fmt(usdTomanRate)+" تومان"
-   :"نرخ خودکار دلار دریافت نشد؛ تبدیل ارز تا دریافت نرخ معتبر غیرفعال است.";
+
+  if(usdTomanRate>0){
+
+   $("fxStatus").textContent=
+    "اختلال در دریافت نرخ جدید؛ آخرین نرخ معتبر حفظ شده: "+
+    fmt(usdTomanRate)+" تومان";
+
+  }else{
+
+   $("fxStatus").textContent=
+    "نرخ دلار دریافت نشد؛ تبدیل ارز موقتاً غیرفعال است.";
+
+   $("fx").value="ناموجود";
+   updateBalance();
+  }
+
   $("fxStatus").style.color="var(--gold)";
-  if(!usdTomanRate){$("fx").value="ناموجود";updateBalance()}
- }finally{usdRateBusy=false}
+
+ }finally{
+  usdRateBusy=false;
+ }
 }
-function updateBalance(){
  if(!window.HamrahTraderAgent||typeof window.HamrahTraderAgent.getStatus!=="function")return;
  const st=window.HamrahTraderAgent.getStatus()||{},rate=effectiveUsdTomanRate();
  const balance=Number(st.balance),equity=Number(st.equity);
