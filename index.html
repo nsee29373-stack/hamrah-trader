@@ -171,7 +171,8 @@ body{padding:0!important;background:radial-gradient(ellipse at 50% -12%,#174c9b 
 <section class="card signalcard">
  <div class="botemoji">🤖</div><div class="signalcenter"><div class="signalbadge">🤖 تحلیل عامل هوشمند</div><div class="label">سیگنال فعلی</div><div class="signal"><strong id="signal" class="wait">WAIT · صبر</strong></div><div class="muted" id="reason">برای تحلیل، داده قیمت بیشتری جمع‌آوری می‌شود.</div></div>
  <div class="score"><div class="label">امتیاز تحلیل</div><strong id="confidence">—</strong><div class="muted">از ۱۰۰</div><div class="indicators"><div>EMA 9<b id="ema9">—</b></div><div>EMA 21<b id="ema21">—</b></div><div>RSI 14<b id="rsi">—</b></div></div></div>
-<section class="card" id="monAgentPanel">
+</section>
+<section class="card mon-agent-panel" id="monAgentPanel">
  <div class="sectiontitle"><span>🧠 تحلیل اختصاصی Monad (MON)</span><span class="label" id="monDataState">در انتظار دریافت داده</span></div>
  <div class="muted">تحلیل چندبازه‌ای با EMA 9/21 و RSI 14؛ فقط در صورت وجود داده معتبر. بازه‌های ۵ و ۱۵ دقیقه، ۱ و ۴ ساعت و روزانه.</div>
  <div class="mon-tf-grid" id="monTfGrid"><div class="metric"><span>۵ دقیقه</span><b>—</b></div><div class="metric"><span>۱۵ دقیقه</span><b>—</b></div><div class="metric"><span>۱ ساعت</span><b>—</b></div><div class="metric"><span>۴ ساعت</span><b>—</b></div><div class="metric"><span>روزانه</span><b>—</b></div></div>
@@ -179,7 +180,6 @@ body{padding:0!important;background:radial-gradient(ellipse at 50% -12%,#174c9b 
  <div class="mon-risk-line" id="monRiskText">ریسک هر معامله: ۰٫۵٪ موجودی · سقف زیان روزانه: ۲٪ · حداکثر ۳ معامله در روز</div>
  <div class="row mon-actions"><button class="primary" id="monAnalyze">⟳ تحلیل دوباره MON</button><button class="buybtn" id="monAutoToggle">شروع دمو خودکار</button></div>
  <div class="notice">حالت خودکار فقط در حساب آزمایشی اجرا می‌شود. در نبود داده کافی یا نرخ معتبر، معامله‌ای باز نمی‌کند.</div>
-</section>
 </section>
 </section>
 <section class="inner-view view" id="view-trade"><div class="view-head"><button class="back-home" onclick="openView('home')">⌂ خانه</button><div><b>⚡ معاملات آزمایشی</b><small>مدیریت حجم، حد ضرر و حد سود</small></div></div>
@@ -591,7 +591,7 @@ function closePosition(){
  }catch(e){setStatus(e.message)}
 }
 $("refresh").addEventListener("click",getPrice);$("buy").addEventListener("click",()=>trade("BUY"));$("sell").addEventListener("click",()=>trade("SELL"));$("closePosition").addEventListener("click",closePosition);
-$("symbol").addEventListener("change",()=>{requestToken++;requestBusy=false;currentPrice=null;currentHighRaw=null;currentLowRaw=null;prices=[];candles=[];currentSymbol="";historyNeedsRefresh=true;$("price").textContent="— ریال";$("price").classList.remove("trend-up","trend-down","trend-flat");$("priceRaw").textContent="قیمت مرجع: —";$("priceRaw").classList.remove("trend-up","trend-down","trend-flat");$("priceMeta").textContent="در حال دریافت قیمت نماد جدید…";$("change").textContent=$("high").textContent=$("low").textContent="—";$("signal").textContent="WAIT · صبر";$("signal").className="wait";$("confidence").textContent="—";$("reason").textContent="در انتظار داده معتبر نماد جدید…";$("ema9").textContent=$("ema21").textContent=$("rsi").textContent="—";drawChart();connectChartStream();renderPosition();getPrice();refreshOpenPositionQuote()});
+$("symbol").addEventListener("change",()=>{const monPanel=document.getElementById("monAgentPanel");if(monPanel)monPanel.classList.toggle("is-active",$("symbol").value==="MONUSDT");requestToken++;requestBusy=false;currentPrice=null;currentHighRaw=null;currentLowRaw=null;prices=[];candles=[];currentSymbol="";historyNeedsRefresh=true;$("price").textContent="— ریال";$("price").classList.remove("trend-up","trend-down","trend-flat");$("priceRaw").textContent="قیمت مرجع: —";$("priceRaw").classList.remove("trend-up","trend-down","trend-flat");$("priceMeta").textContent="در حال دریافت قیمت نماد جدید…";$("change").textContent=$("high").textContent=$("low").textContent="—";$("signal").textContent="WAIT · صبر";$("signal").className="wait";$("confidence").textContent="—";$("reason").textContent="در انتظار داده معتبر نماد جدید…";$("ema9").textContent=$("ema21").textContent=$("rsi").textContent="—";drawChart();connectChartStream();renderPosition();getPrice();refreshOpenPositionQuote()});
 $("refreshChart").addEventListener("click",()=>{historyNeedsRefresh=true;chartZoom=1;chartOffset=0;getPrice()});$("chartInterval").addEventListener("change",()=>{historyNeedsRefresh=true;chartZoom=2.2;chartOffset=0;chartSelected=-1;candles=[];prices=[];$("chartDetail").classList.add("hidden");getPrice()});setupChartControls();window.addEventListener("resize",()=>requestAnimationFrame(drawChart));
 window.addEventListener("load",()=>{
  if(!window.HamrahTraderAgent){setStatus("فایل agent.js بارگذاری نشده است؛ موتور معاملات آزمایشی فعال نیست.");$("buy").disabled=$("sell").disabled=$("closePosition").disabled=true;return}
@@ -630,6 +630,9 @@ if("serviceWorker"in navigator)window.addEventListener("load",()=>navigator.serv
   if(!valid.includes(name))name='home';
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
   const target=document.getElementById('view-'+name);if(target)target.classList.add('active');
+  const monPanel=document.getElementById('monAgentPanel');
+  const symbolSelect=document.getElementById('symbol');
+  if(monPanel)monPanel.classList.toggle('is-active',!!(symbolSelect&&symbolSelect.value==='MONUSDT'));
   if(name==='history'&&typeof renderHistory==='function')renderHistory();
   if(name==='emerging'&&typeof window.loadEmergingAssets==='function')window.loadEmergingAssets(false);
   if(name==='account'){const fx=document.getElementById('fx'),out=document.getElementById('fxDisplayMirror');if(fx&&out)out.textContent=fx.value||'در حال دریافت…';}
@@ -645,6 +648,18 @@ if("serviceWorker"in navigator)window.addEventListener("load",()=>navigator.serv
 .mon-summary{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;padding:9px;background:#071b36;border:1px solid #315b91;border-radius:11px;font-size:10px}
 .mon-summary strong{font-size:14px;color:#ffd21c}.mon-risk-line{font-size:9px;color:#a9c1e5;margin:8px 2px}.mon-actions{margin-top:8px}.mon-actions button{font-size:10px;min-height:36px}
 @media(max-width:420px){.mon-tf-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.mon-summary strong{font-size:12px}}
+/* Analysis layout fix: full-width vertical cards on every mobile screen. */
+#view-analysis{width:100%;min-width:0;overflow-x:hidden}
+#view-analysis>.signalcard{width:100%;min-width:0;grid-template-columns:clamp(38px,12vw,64px) minmax(0,1fr) clamp(88px,25vw,120px);align-items:center}
+#view-analysis>.mon-agent-panel{display:none;width:100%;min-width:0;max-width:100%;margin:10px 0!important;grid-column:1/-1;overflow:hidden}
+#view-analysis>.mon-agent-panel.is-active{display:block}
+#view-analysis .mon-tf-grid{width:100%;min-width:0;grid-template-columns:repeat(5,minmax(0,1fr))}
+#view-analysis .mon-tf-grid>.metric{min-width:0;overflow-wrap:anywhere}
+#view-analysis .mon-summary{width:100%;min-width:0;flex-wrap:wrap;overflow-wrap:anywhere}
+#view-analysis .mon-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));width:100%;min-width:0}
+#view-analysis .mon-actions button{min-width:0;white-space:normal}
+@media(max-width:520px){#view-analysis .mon-tf-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:360px){#view-analysis>.signalcard{grid-template-columns:30px minmax(0,1fr) 82px;gap:4px}#view-analysis .mon-actions{grid-template-columns:1fr}}
 </style>
 <script>
 (function(){
@@ -726,4 +741,3 @@ if("serviceWorker"in navigator)window.addEventListener("load",()=>navigator.serv
 })();
 </script>
 </body></html>
-
