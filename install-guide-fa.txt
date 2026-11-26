@@ -1,0 +1,20 @@
+راهنمای افزودن اتصال حساب همراه تریدر
+
+فایل account-connect.js را در ریشه مخزن hamrah-trader قرار دهید؛ کنار index.html و agent.js.
+
+سپس index.html را در GitHub باز کنید، Edit را بزنید و درست قبل از </body> این دو خط را اضافه کنید:
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="./account-connect.js"></script>
+
+ترتیب دو خط مهم است: ابتدا کتابخانه Supabase و بعد account-connect.js.
+فایل را با Commit changes ذخیره کنید. برای APK باید پس از ثبت تغییرات، workflow با نام Build Hamrah Trader APK اجرا شود؛ اجرای Pages به‌تنهایی APK نمی‌سازد.
+
+این فایل فقط ورود/ثبت‌نام Supabase، اتصال مشاهده‌ای بیت‌پین و نمایش موجودی را اضافه می‌کند. هیچ سفارش واقعی، برداشت یا انتقال دارایی ارسال نمی‌کند.
+
+پیش‌نیاز سرور:
+در Supabase Dashboard > Edge Functions > Secrets باید Secret با نام دقیق TRADER_CREDENTIALS_ENCRYPTION_KEY ثبت شده باشد. مقدار آن را در فایل HTML یا JavaScript قرار ندهید و در چت ارسال نکنید.
+
+اگر هنگام اتصال خطای encryption_key_not_configured دیدید، Secret بالا ثبت نشده است. اگر خطای bitpin_authentication_failed یا upstream_status 403 دیدید، مجوز یا محدودیت سمت بیت‌پین باید بررسی شود.
+
+این تغییر به‌تنهایی خرید واقعی را فعال نمی‌کند. قبل از خرید واقعی باید مسیر سفارش امن، بررسی نماد/مبلغ/موجودی و تأیید نهایی هر سفارش جداگانه پیاده‌سازی و آزمایش شود.
