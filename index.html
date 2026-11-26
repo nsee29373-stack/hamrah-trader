@@ -162,7 +162,7 @@ body{padding:0!important;background:radial-gradient(ellipse at 50% -12%,#174c9b 
 <section class="card">
  <div class="sectiontitle"><span>💹 بازار و قیمت لحظه‌ای</span><span class="muted">بازار جهانی</span></div>
  <div class="marketgrid"><div class="marketleft"><div class="row"><select id="symbol">
- <optgroup label="رمزارزها"><option value="BTCUSDT">BTC / USDT</option><option value="ETHUSDT">ETH / USDT</option><option value="BNBUSDT">BNB / USDT</option><option value="SOLUSDT">SOL / USDT</option><option value="XRPUSDT">XRP / USDT</option><option value="ADAUSDT">ADA / USDT</option><option value="DOGEUSDT" selected>DOGE / USDT</option><option value="LINKUSDT">LINK / USDT</option><option value="AVAXUSDT">AVAX / USDT</option><option value="TONUSDT">TON / USDT</option><option value="TRXUSDT">TRX / USDT</option><option value="SUIUSDT">SUI / USDT</option><option value="ONDOUSDT">ONDO / USDT</option><option value="HYPEUSDT">HYPE / USDT</option></optgroup>
+ <optgroup label="رمزارزها"><option value="BTCUSDT">BTC / USDT</option><option value="ETHUSDT">ETH / USDT</option><option value="BNBUSDT">BNB / USDT</option><option value="SOLUSDT">SOL / USDT</option><option value="XRPUSDT">XRP / USDT</option><option value="ADAUSDT">ADA / USDT</option><option value="DOGEUSDT" selected>DOGE / USDT</option><option value="LINKUSDT">LINK / USDT</option><option value="AVAXUSDT">AVAX / USDT</option><option value="TONUSDT">TON / USDT</option><option value="TRXUSDT">TRX / USDT</option><option value="SUIUSDT">SUI / USDT</option><option value="ONDOUSDT">ONDO / USDT</option><option value="HYPEUSDT">HYPE / USDT</option><option value="MONUSDT">MON / USDT · Monad</option></optgroup>
  <optgroup label="فارکس و طلا"><option value="EURUSD">EUR / USD</option><option value="GBPUSD">GBP / USD</option><option value="USDJPY">USD / JPY</option><option value="XAUUSD">XAU / USD</option></optgroup></select><button class="primary" id="refresh">⟳ بروزرسانی</button></div><div class="price" id="price">— ریال</div><div class="muted" id="priceRaw">قیمت مرجع بازار: —</div><div class="muted" id="priceMeta">در انتظار دریافت قیمت…</div></div>
  <div class="marketright"><div class="label">تغییر ۲۴ ساعته</div><strong id="change">—</strong><div class="metrics" style="grid-template-columns:1fr 1fr"><div class="metric"><span>بالاترین</span><b id="high">—</b></div><div class="metric"><span>پایین‌ترین</span><b id="low">—</b></div></div><div class="status" id="status">در انتظار دریافت قیمت معتبر…</div></div></div>
 </section>
@@ -171,6 +171,15 @@ body{padding:0!important;background:radial-gradient(ellipse at 50% -12%,#174c9b 
 <section class="card signalcard">
  <div class="botemoji">🤖</div><div class="signalcenter"><div class="signalbadge">🤖 تحلیل عامل هوشمند</div><div class="label">سیگنال فعلی</div><div class="signal"><strong id="signal" class="wait">WAIT · صبر</strong></div><div class="muted" id="reason">برای تحلیل، داده قیمت بیشتری جمع‌آوری می‌شود.</div></div>
  <div class="score"><div class="label">امتیاز تحلیل</div><strong id="confidence">—</strong><div class="muted">از ۱۰۰</div><div class="indicators"><div>EMA 9<b id="ema9">—</b></div><div>EMA 21<b id="ema21">—</b></div><div>RSI 14<b id="rsi">—</b></div></div></div>
+<section class="card" id="monAgentPanel">
+ <div class="sectiontitle"><span>🧠 تحلیل اختصاصی Monad (MON)</span><span class="label" id="monDataState">در انتظار دریافت داده</span></div>
+ <div class="muted">تحلیل چندبازه‌ای با EMA 9/21 و RSI 14؛ فقط در صورت وجود داده معتبر. بازه‌های ۵ و ۱۵ دقیقه، ۱ و ۴ ساعت و روزانه.</div>
+ <div class="mon-tf-grid" id="monTfGrid"><div class="metric"><span>۵ دقیقه</span><b>—</b></div><div class="metric"><span>۱۵ دقیقه</span><b>—</b></div><div class="metric"><span>۱ ساعت</span><b>—</b></div><div class="metric"><span>۴ ساعت</span><b>—</b></div><div class="metric"><span>روزانه</span><b>—</b></div></div>
+ <div class="mon-summary"><span>نتیجه ترکیبی</span><strong id="monConsensus">WAIT · صبر</strong><span id="monScore">—</span></div>
+ <div class="mon-risk-line" id="monRiskText">ریسک هر معامله: ۰٫۵٪ موجودی · سقف زیان روزانه: ۲٪ · حداکثر ۳ معامله در روز</div>
+ <div class="row mon-actions"><button class="primary" id="monAnalyze">⟳ تحلیل دوباره MON</button><button class="buybtn" id="monAutoToggle">شروع دمو خودکار</button></div>
+ <div class="notice">حالت خودکار فقط در حساب آزمایشی اجرا می‌شود. در نبود داده کافی یا نرخ معتبر، معامله‌ای باز نمی‌کند.</div>
+</section>
 </section>
 </section>
 <section class="inner-view view" id="view-trade"><div class="view-head"><button class="back-home" onclick="openView('home')">⌂ خانه</button><div><b>⚡ معاملات آزمایشی</b><small>مدیریت حجم، حد ضرر و حد سود</small></div></div>
@@ -181,6 +190,11 @@ body{padding:0!important;background:radial-gradient(ellipse at 50% -12%,#174c9b 
  <div class="hidden"><input id="fx" type="text" value="در حال دریافت…" readonly><div id="fxStatus">دریافت نرخ بازار ایران…</div></div>
  <div class="actions"><button class="buybtn" id="buy">↗ خرید آزمایشی</button><button class="sellbtn" id="sell">↙ فروش آزمایشی</button><button class="closebtn" id="closePosition">✕ بستن معامله</button></div>
  <div class="muted" id="position">موقعیت بازی وجود ندارد.</div><div class="notice">⚠️ این بخش فقط شبیه‌سازی است. سفارش واقعی و اتصال به بروکر غیرفعال است؛ سود و زیان و تبدیل ارزها تقریبی است.</div>
+<section class="card" id="exchangeSafetyPanel">
+ <div class="sectiontitle">🔐 زیرساخت اتصال امن صرافی</div>
+ <div class="mon-summary"><span>وضعیت اتصال</span><strong class="wait">غیرفعال · فقط آماده‌سازی</strong><span>سفارش واقعی قفل است</span></div>
+ <div class="muted">در این نسخه فقط داده عمومی بازار استفاده می‌شود. کلید API ذخیره نمی‌شود؛ برداشت وجه، انتقال پول و ارسال سفارش واقعی غیرفعال است. اتصال خصوصی در نسخه بعدی فقط با مجوز مشاهده و معامله، بدون مجوز برداشت و با تأیید جداگانه هر سفارش طراحی خواهد شد.</div>
+</section>
 </section>
 </section>
 <section class="inner-view view" id="view-chart"><div class="view-head"><button class="back-home" onclick="openView('home')">⌂ خانه</button><div><b>📈 نمودار بازار</b><small>تاریخچه و بررسی روند قیمت</small></div></div>
@@ -441,7 +455,7 @@ function renderHistory(){
  return "<tr><td>"+when+"</td><td>"+String(t.symbol||"—")+"</td><td>"+String(t.side||"—")+"</td><td>"+fmt(t.qty)+"</td><td>"+formatRial(entryIrr)+"</td><td>"+formatRial(exitIrr)+"</td><td style='color:"+(pnl>=0?"#35d49a":"#ff647c")+"'>"+fmt(pnl)+"</td><td>"+(tom===null?"—":fmt(tom))+"</td><td>"+(rial===null?"—":fmt(rial))+"</td></tr>"}).join("")+"</tbody></table></div>"
 }
 function showHistory(){openView("history");renderHistory()}
-const IDS={BTCUSDT:"bitcoin",ETHUSDT:"ethereum",BNBUSDT:"binancecoin",SOLUSDT:"solana",XRPUSDT:"ripple",ADAUSDT:"cardano",DOGEUSDT:"dogecoin",LINKUSDT:"chainlink",AVAXUSDT:"avalanche-2",TONUSDT:"the-open-network",TRXUSDT:"tron",SUIUSDT:"sui",ONDOUSDT:"ondo",HYPEUSDT:"hyperliquid"};
+const IDS={BTCUSDT:"bitcoin",ETHUSDT:"ethereum",BNBUSDT:"binancecoin",SOLUSDT:"solana",XRPUSDT:"ripple",ADAUSDT:"cardano",DOGEUSDT:"dogecoin",LINKUSDT:"chainlink",AVAXUSDT:"avalanche-2",TONUSDT:"the-open-network",TRXUSDT:"tron",SUIUSDT:"sui",ONDOUSDT:"ondo",HYPEUSDT:"hyperliquid",MONUSDT:"monad"};
 function unwrapRows(payload){
  if(Array.isArray(payload))return payload;if(payload&&Array.isArray(payload.results))return payload.results;if(payload&&Array.isArray(payload.data))return payload.data;if(payload&&payload.data&&Array.isArray(payload.data.results))return payload.data.results;if(payload&&typeof payload==="object")return Object.values(payload).filter(x=>x&&typeof x==="object");return []
 }
@@ -619,6 +633,92 @@ if("serviceWorker"in navigator)window.addEventListener("load",()=>navigator.serv
  };
  const oldSync=()=>{const fx=document.getElementById('fx'),out=document.getElementById('fxDisplayMirror');if(fx&&out)out.textContent=fx.value||'در حال دریافت…'};
  oldSync();setInterval(oldSync,1500);
+})();
+</script>
+<style>
+.mon-tf-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;margin:10px 0}
+.mon-tf-grid .metric{padding:7px 4px;text-align:center}.mon-tf-grid .metric span{font-size:9px}.mon-tf-grid .metric b{font-size:11px;text-align:center;direction:rtl}
+.mon-summary{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;padding:9px;background:#071b36;border:1px solid #315b91;border-radius:11px;font-size:10px}
+.mon-summary strong{font-size:14px;color:#ffd21c}.mon-risk-line{font-size:9px;color:#a9c1e5;margin:8px 2px}.mon-actions{margin-top:8px}.mon-actions button{font-size:10px;min-height:36px}
+@media(max-width:420px){.mon-tf-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.mon-summary strong{font-size:12px}}
+</style>
+<script>
+(function(){
+ 'use strict';
+ const $=id=>document.getElementById(id);
+ const intervals=[['5m','۵ دقیقه'],['15m','۱۵ دقیقه'],['1h','۱ ساعت'],['4h','۴ ساعت'],['1d','روزانه']];
+ let autoTimer=null,autoOn=false,busy=false,lastFrames=null,lastAnalysis=null;
+ const safeText=(id,value)=>{const el=$(id);if(el)el.textContent=value};
+ async function getJson(url){const r=await fetch(url,{cache:'no-store',headers:{Accept:'application/json'}});if(!r.ok)throw new Error('HTTP '+r.status);return r.json()}
+ async function binanceCandles(tf){
+  for(const host of ['https://data-api.binance.vision','https://api.binance.com']){
+   try{const rows=await getJson(host+'/api/v3/klines?symbol=MONUSDT&interval='+tf+'&limit=300');
+    const closes=rows.map(x=>Number(x[4])).filter(x=>x>0&&Number.isFinite(x));if(closes.length>=22)return closes;
+   }catch(e){}
+  }
+  return null;
+ }
+ function aggregate(points,ms){const buckets=new Map();points.forEach(p=>{const t=Math.floor(Number(p[0])/ms)*ms;buckets.set(t,Number(p[1]))});return Array.from(buckets.entries()).sort((a,b)=>a[0]-b[0]).map(x=>x[1]).filter(x=>x>0&&Number.isFinite(x))}
+ async function fallbackHistory(){
+  const d=await getJson('https://api.coingecko.com/api/v3/coins/monad/market_chart?vs_currency=usd&days=90');
+  const pts=Array.isArray(d.prices)?d.prices:[];if(pts.length<22)throw new Error('تاریخچه MON از منبع جایگزین کافی نیست');
+  return {'1h':pts.map(x=>Number(x[1])).filter(x=>x>0),'4h':aggregate(pts,4*60*60*1000),'1d':aggregate(pts,24*60*60*1000)};
+ }
+ function renderAnalysis(a){
+  const labels={'5m':'۵ دقیقه','15m':'۱۵ دقیقه','1h':'۱ ساعت','4h':'۴ ساعت','1d':'روزانه'};
+  const root=$('monTfGrid');root.replaceChildren();
+  intervals.forEach(([tf,label])=>{const item=a.frames[tf]||{ready:false,signal:'WAIT'};const div=document.createElement('div');div.className='metric';const small=document.createElement('span');small.textContent=label;const b=document.createElement('b');b.textContent=item.ready?(item.signal==='BUY'?'خرید':item.signal==='SELL'?'فروش':'صبر')+' · RSI '+Number(item.rsi).toFixed(1):'داده کافی نیست';b.style.color=item.signal==='BUY'?'#00e78c':item.signal==='SELL'?'#ff6278':'#ffd21c';div.append(small,b);root.append(div)});
+  safeText('monConsensus',a.signal==='BUY'?'BUY · تمایل صعودی':a.signal==='SELL'?'SELL · تمایل نزولی':'WAIT · صبر');
+  safeText('monScore',a.confidence+'/100 · '+a.validFrames+' بازه معتبر');
+  safeText('monDataState','آخرین تحلیل: '+new Date(a.analyzedAt).toLocaleTimeString('fa-IR'));
+  const risk=window.HamrahTraderAgent.getRiskStatus();safeText('monRiskText','ریسک هر معامله: ۰٫۵٪ · سقف زیان روزانه: ۲٪ ($'+risk.maxDailyLossUsd.toFixed(2)+') · معاملات امروز: '+risk.tradesToday+'/3 · سود/زیان بسته‌شده امروز: $'+risk.dailyPnlUsd.toFixed(2));
+ }
+ async function analyzeMon(){
+  if(busy)return;lastAnalysis=null;busy=true;safeText('monDataState','در حال دریافت کندل‌های MON…');
+  try{
+   const frames={};let source='Binance';
+   const results=await Promise.all(intervals.map(async x=>[x[0],await binanceCandles(x[0])]));
+   results.forEach(([tf,values])=>{if(values&&values.length>=22)frames[tf]=values});
+   if(!frames['1h']||!frames['4h']||!frames['1d']){
+    const fallback=await fallbackHistory();source='Binance + CoinGecko';
+    ['1h','4h','1d'].forEach(tf=>{if(!frames[tf]&&fallback[tf]&&fallback[tf].length>=22)frames[tf]=fallback[tf]});
+   }
+   lastFrames=frames;
+   const a=window.HamrahTraderAgent.analyzeMultiTimeframe(frames);lastAnalysis=a;renderAnalysis(a);
+   safeText('monDataState',source+' · '+a.validFrames+' بازه قابل تحلیل');
+   if(a.validFrames<3)safeText('monConsensus','WAIT · داده کافی نیست');
+  }catch(e){safeText('monDataState','تحلیل ناموفق: '+(e.message||'خطای دریافت داده'));safeText('monConsensus','WAIT · تحلیل متوقف');}
+  finally{busy=false}
+ }
+ async function autoCycle(){
+  if(!autoOn||busy)return;
+  await analyzeMon();if(!autoOn||!lastAnalysis||!['BUY','SELL'].includes(lastAnalysis.signal))return;
+  const status=window.HamrahTraderAgent.getStatus(),risk=window.HamrahTraderAgent.getRiskStatus();
+  if(risk.blocked)return;
+  try{
+   const quote=await getJson('https://api.coingecko.com/api/v3/simple/price?ids=monad&vs_currencies=usd');
+   const price=Number(quote&&quote.monad&&quote.monad.usd);if(!(price>0))throw new Error('قیمت معتبر MON موجود نیست');
+   if(status.position){
+    if(status.position.symbol==='MONUSDT'&&status.position.side!==lastAnalysis.signal){window.HamrahTraderAgent.closeTrade(price,'SIGNAL_REVERSAL');safeText('monDataState','موقعیت دمو با سیگنال معکوس بسته شد.');}
+    else return;
+   }else{
+    const opened=window.HamrahTraderAgent.openRiskManagedTrade(lastAnalysis.signal,price,'MONUSDT',{sl:1.5,tp:3});
+    safeText('monDataState','معامله دمو '+(opened.side==='BUY'?'خرید':'فروش')+' ثبت شد · ریسک حدود $'+Number(opened.riskUsd||0).toFixed(2));
+   }
+  }catch(e){safeText('monDataState','معامله دمو انجام نشد: '+(e.message||'خطا'))}
+ }
+ function toggleAuto(){
+  autoOn=!autoOn;const b=$('monAutoToggle');
+  if(autoOn){
+   const symbol=$('symbol');if(symbol&&symbol.value!=='MONUSDT'){symbol.value='MONUSDT';symbol.dispatchEvent(new Event('change',{bubbles:true}))}
+   b.textContent='توقف دمو خودکار';b.classList.remove('buybtn');b.classList.add('sellbtn');
+   safeText('monDataState','حالت دمو خودکار فعال است؛ سفارش واقعی غیرفعال');autoCycle();autoTimer=setInterval(autoCycle,60000);
+  }else{if(autoTimer)clearInterval(autoTimer);autoTimer=null;b.textContent='شروع دمو خودکار';b.classList.remove('sellbtn');b.classList.add('buybtn');safeText('monDataState','دمو خودکار متوقف شد؛ معاملات باز طبق حد ضرر/سود پایش می‌شوند.')}
+ }
+ if($('monAnalyze'))$('monAnalyze').addEventListener('click',analyzeMon);
+ if($('monAutoToggle'))$('monAutoToggle').addEventListener('click',toggleAuto);
+ window.HamrahTraderExchange=Object.freeze({mode:'PREPARED_DISABLED',publicMarketDataOnly:true,credentialsStored:false,withdrawalsAllowed:false,realOrdersEnabled:false,requestOrder:function(){return Promise.reject(new Error('سفارش واقعی در این نسخه غیرفعال است.'))}});
+ window.addEventListener('beforeunload',()=>{if(autoTimer)clearInterval(autoTimer)});
 })();
 </script>
 </body></html>
