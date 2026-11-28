@@ -739,7 +739,6 @@ if("serviceWorker"in navigator)window.addEventListener("load",()=>navigator.serv
  window.HamrahTraderExchange=Object.freeze({mode:'PREPARED_DISABLED',publicMarketDataOnly:true,credentialsStored:false,withdrawalsAllowed:false,realOrdersEnabled:false,requestOrder:function(){return Promise.reject(new Error('سفارش واقعی در این نسخه غیرفعال است.'))}});
  window.addEventListener('beforeunload',()=>{if(autoTimer)clearInterval(autoTimer)});
 })();
-</script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="./account-connect.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
